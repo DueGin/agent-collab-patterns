@@ -2,13 +2,17 @@
 
 10 种常见的多 Agent 协作模式，每种一张可交互的动画图。在线浏览：**https://duegin.github.io/agent-collab-patterns/**
 
-每张图包括四部分：
-- 拓扑：谁把什么交给谁。
-- 主路径：蓝线和小圆点动画。
-- 实测成本：同一任务在 Dify 上各跑 1 次的耗时和 token。
-- 市面上遵循这种模式的工具：底部的灰色卡片。
+站点有三类页面：
 
-图是交互式 HTML。悬停或点击节点能看详情，可以切换亮色和暗色，也可以重放动画。每张图另有一份 PNG，可以直接放进文档。
+- **首页**：10 张卡片，每张有拓扑缩略图、实测成本、一条优势、一条劣势和代表工具。
+- **模式页**：每种模式一张可交互的动画图，只画协作拓扑，主路径用蓝线和小圆点动画标出。图下方依次是"优势与劣势"（含适合 / 不适合的场景和 6 项评分），以及"市面上遵循此模式的工具"。页面顶部和底部都有导航：返回全部、上一个、下一个、纵向对比。
+- **[纵向对比](https://duegin.github.io/agent-collab-patterns/compare.html)**：包括四块：
+  - 实测成本：耗时和 token 两张条形图。
+  - 定性评估矩阵：省钱、速度、质量把关、多视角、可审计、易搭建。
+  - 按场景选。
+  - 优劣速查。
+
+图是交互式 HTML。悬停或点击节点能看详情，可以切换亮色和暗色，也可以重放动画。每张图另有一份 PNG（只有图），可以直接放进文档。
 
 | # | 模式 | 拓扑 | 模型调用 | 实测（相对单 Agent） | 市面上的代表工具 |
 |---|---|---|---|---|---|
@@ -21,22 +25,31 @@
 | [MA-06](https://duegin.github.io/agent-collab-patterns/ma-06-debate.html) | 多 Agent 辩论 | 主持人 → 正反立论 → 交叉反驳 → 裁判 | 6 | 54s · 11.3k（×4.5） | MS Agent Framework GroupChat、Maestro Group Chat、CAMEL、Multi-Agent Debate（论文） |
 | [MA-07](https://duegin.github.io/agent-collab-patterns/ma-07-voting.html) | 投票集成 | 3 份独立答卷 → 评委择优融合 | 4 | 42s · 14.1k（×5.6） | Cursor /best-of-n、Codex Cloud `--attempts`、GitHub Agent HQ、llm-council |
 | [MA-08](https://duegin.github.io/agent-collab-patterns/ma-08-blackboard.html) | 团队协作 · 共享黑板 | 组长 → 3 人发帖 → 互看回应 → 整合 | 8 | 54s · 19.6k（×7.8） | Claude Code Agent Teams、Codex multi-agent V2、Hermes Kanban、DeepSeek Harness Teams、hcom、Paperclip / Multica |
-| [MA-09](https://duegin.github.io/agent-collab-patterns/ma-09-contract-gate.html) | 契约编排 + 闸门验证（推荐） | 规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合 | 约 6+2N | 208s · 68.4k（×27） | Kimi Code Tower、Orchestrator.inc、Gas Town Refinery、Bernstein、Cursor planner/worker/judge |
+| [MA-09](https://duegin.github.io/agent-collab-patterns/ma-09-contract-gate.html) | 契约编排 + 闸门验证（推荐） | 规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合 | 约 6+2N | 208s · 68.4k（×27.3） | Kimi Code Tower、Orchestrator.inc、Gas Town Refinery、Bernstein、Cursor planner/worker/judge |
 
 ## 说明
 
 - **实测数据**：2026-11-06 在 Dify 1.17.1 上用同一个任务各跑 1 次，执行模型是 `deepseek-v4.1-flash`，评审模型是 `claude-sonnet-5-5`。只跑了 1 次，看量级，不要看小数点。
 - **代表工具**：是 2026-10 调研时的状态。多数工具只是"部分对应"：它的核心机制属于这种模式，不代表完整实现了图上每个节点。很多产品同时支持好几种模式，比如 Claude Code 同时有 subagent（MA-04）和 Agent Teams（MA-08）。这里按它最有代表性的那项能力归类。
+- **评分**：纵向对比里的 1–5 分是作者的定性判断，不是测量结果。
 - **MA-09 的设计思路**：中心化编排 + 写操作单线程 + 明确边界 + 独立验证。事前靠契约和不相交的写集合，事中靠隔离执行，事后靠规则闸门、交叉评审、定向返工和单写者整合。
 
 ## 修改和重新生成
 
-图的源文件是 `docs/` 下的 JSON spec（`ma-*.json`），HTML 和 PNG 都是由它生成的。改完 spec 后运行：
+源文件有两类：
+- `docs/ma-*.json`：每张图的 SeeCode spec，图页面和图片都由它生成。
+- `data/patterns.json`：其余的展示内容，包括实测数据、优势、劣势、适合 / 不适合、评分、按场景选、代表工具。`scripts/site.mjs` 用它生成首页和纵向对比页，并把导航、优劣和工具区块插到每张图页面上。
+
+改完任意一类后运行：
 
 ```bash
-scripts/build.sh            # 重新渲染全部 HTML、index.html，并导出 PNG
-scripts/build.sh --no-png   # 只渲染 HTML
+scripts/build.sh            # 渲染图 → 导出缩略图和 PNG → 生成站点页面
+scripts/build.sh --no-png   # 不重新导出图片（快）。只改了 patterns.json 时用这个
 ```
+
+`build.sh` 会把图片导出到这两个位置：
+- `docs/thumbs/`：首页用的缩略图，只有图，分亮色和暗色两份。
+- `docs/ma-*.png`：带标题和图注的完整图。
 
 需要 Node ≥ 20。导出 PNG 需要本机装有 Chrome 或 Edge。脚本第一次运行时会把 SeeCode 拉到 `.seecode/`，并固定在一个指定的 commit。
 

@@ -46,56 +46,6 @@
    "icon": "check",
    "row": 0,
    "col": 4
-  },
-  {
-   "id": "tool0",
-   "label": "MetaGPT",
-   "sub": "PM→架构师→工程师 SOP",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "ChatDev",
-   "sub": "瀑布式阶段接力",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "CrewAI",
-   "sub": "sequential 流程",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "Archon",
-   "sub": "YAML 写死步骤",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 3
-  },
-  {
-   "id": "tool4",
-   "label": "Dify / Coze / n8n",
-   "sub": "节点串联工作流",
-   "tag": "平台",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 4
   }
  ],
  "edges": [
@@ -141,19 +91,8 @@
    },
    "primary": {
     "label": "主路径"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful",
- "groups": [
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
-  }
- ]
+ "watermark": false
 }

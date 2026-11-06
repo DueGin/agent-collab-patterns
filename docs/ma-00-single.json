@@ -30,36 +30,6 @@
    "icon": "check",
    "row": 0,
    "col": 2
-  },
-  {
-   "id": "tool0",
-   "label": "Claude Code / Codex",
-   "sub": "单会话，不开 subagent",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "Cursor / Copilot",
-   "sub": "IDE 里的单个 agent",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "ChatGPT / Claude",
-   "sub": "普通对话",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 1,
-   "col": 2
   }
  ],
  "edges": [
@@ -90,19 +60,8 @@
    },
    "primary": {
     "label": "主路径"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful",
- "groups": [
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
-  }
- ]
+ "watermark": false
 }

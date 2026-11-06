@@ -10,11 +10,6 @@
    "id": "workers",
    "label": "动态并行 · 数量由编排者决定",
    "style": "dashed"
-  },
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
   }
  ],
  "nodes": [
@@ -73,56 +68,6 @@
    "kind": "external",
    "icon": "check",
    "row": 1,
-   "col": 4
-  },
-  {
-   "id": "tool0",
-   "label": "Claude Code",
-   "sub": "Agent 工具（subagent）",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "Codex",
-   "sub": "spawn_agent",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "Kimi Code",
-   "sub": "Agent Swarm",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "Hermes Agent",
-   "sub": "delegate_task",
-   "tag": "开源",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 3
-  },
-  {
-   "id": "tool4",
-   "label": "AWS CAO / Paseo",
-   "sub": "跨厂商派活",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
    "col": 4
   }
  ],
@@ -188,12 +133,8 @@
    },
    "default": {
     "label": "调用 / 数据流"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful"
+ "watermark": false
 }

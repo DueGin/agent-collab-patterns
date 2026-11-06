@@ -1,0 +1,710 @@
+{
+  "_note": "多 Agent 协作模式的全部展示数据。scripts/site.mjs 用它生成 docs/ 下的首页、对比页，并给每张图页面注入导航、优劣和代表工具。",
+  "measured": {
+    "date": "2026-11-06",
+    "platform": "Dify 1.17.1",
+    "executor": "deepseek-v4.1-flash",
+    "reviewer": "claude-sonnet-5-5",
+    "runs": 1
+  },
+  "ratings": {
+    "_note": "定性评估（作者判断，不是测量结果），1–5 分，分越高越好。",
+    "dims": [
+      [
+        "cost",
+        "省钱"
+      ],
+      [
+        "speed",
+        "速度"
+      ],
+      [
+        "gate",
+        "质量把关"
+      ],
+      [
+        "views",
+        "多视角"
+      ],
+      [
+        "audit",
+        "可审计"
+      ],
+      [
+        "ease",
+        "易搭建"
+      ]
+    ]
+  },
+  "scenarios": [
+    {
+      "need": "简单、边界清楚的问题",
+      "id": "MA-00",
+      "why": "一次调用就够，多加 Agent 只会增加成本和延迟"
+    },
+    {
+      "need": "有固定工序的内容生产",
+      "id": "MA-01",
+      "why": "每道工序一个专职角色，流程固定、可复现"
+    },
+    {
+      "need": "多领域问答 / 客服分诊",
+      "id": "MA-02",
+      "why": "只多一次分类调用，每类问题都交给对口的专家"
+    },
+    {
+      "need": "需要几个固定维度的分析",
+      "id": "MA-03",
+      "why": "维度事先确定，几路并行、互不干扰，覆盖面有保证"
+    },
+    {
+      "need": "可拆分的调研、只读探索",
+      "id": "MA-04",
+      "why": "编排者按需拆分，子 Agent 各用全新上下文并行跑"
+    },
+    {
+      "need": "单件产出，要求高质量",
+      "id": "MA-05",
+      "why": "有明确的验收标准，可以一轮轮改到达标"
+    },
+    {
+      "need": "方案取舍、需要暴露反例",
+      "id": "MA-06",
+      "why": "正反方互相反驳，能逼出隐含假设和风险"
+    },
+    {
+      "need": "关键答案，怕出错",
+      "id": "MA-07",
+      "why": "多份独立答卷互相抵消单次失误，结果最稳"
+    },
+    {
+      "need": "多假设排查，成员要互相纠错",
+      "id": "MA-08",
+      "why": "成员能看到彼此的结论，可以当场质疑、修正"
+    },
+    {
+      "need": "多人并行改代码，结果要可审计",
+      "id": "MA-09",
+      "why": "写集合事先划清，执行后有闸门、评审和单写者整合"
+    }
+  ],
+  "patterns": [
+    {
+      "slug": "ma-00-single",
+      "id": "MA-00",
+      "name": "单 Agent 基线",
+      "short": "单 Agent",
+      "topo": "一个 Agent 一次完成",
+      "calls": "1",
+      "secs": 24,
+      "tokens": 2506,
+      "pros": [
+        "成本和延迟都最低，是其它模式的对照组",
+        "没有协调开销，没有传话失真",
+        "上下文完整，出错时最好排查"
+      ],
+      "cons": [
+        "只有一个视角，没有任何自检",
+        "错误会直接进入最终结果",
+        "任务一长，上下文容易被挤爆"
+      ],
+      "fit": [
+        "简单、边界清楚的任务",
+        "快速出草稿或原型"
+      ],
+      "unfit": [
+        "需要多视角或质量把关的任务",
+        "超出一个上下文窗口的大任务"
+      ],
+      "scores": {
+        "cost": 5,
+        "speed": 5,
+        "gate": 1,
+        "views": 1,
+        "audit": 2,
+        "ease": 5
+      },
+      "tools": [
+        {
+          "name": "Claude Code / Codex",
+          "how": "单会话，不开 subagent",
+          "kind": "厂商"
+        },
+        {
+          "name": "Cursor / Copilot",
+          "how": "IDE 里的单个 agent",
+          "kind": "厂商"
+        },
+        {
+          "name": "ChatGPT / Claude",
+          "how": "普通对话",
+          "kind": "厂商"
+        }
+      ],
+      "x": 1.0
+    },
+    {
+      "slug": "ma-01-pipeline",
+      "id": "MA-01",
+      "name": "顺序流水线",
+      "short": "流水线",
+      "topo": "研究员 → 撰稿人 → 编辑",
+      "calls": "3",
+      "secs": 72,
+      "tokens": 10209,
+      "pros": [
+        "角色分工清晰，每一棒只做一件事",
+        "每个环节可以单独替换、单独调优",
+        "流程固定，结果可复现"
+      ],
+      "cons": [
+        "传话失真：每一棒只看到上一棒的产出",
+        "一棒错、棒棒错，没有回头修正的机会",
+        "耗时逐棒累加，并行度为零"
+      ],
+      "fit": [
+        "有明确工序的内容生产",
+        "需要固定 SOP 的流程"
+      ],
+      "unfit": [
+        "开放式探索",
+        "前后环节需要来回协商的任务"
+      ],
+      "scores": {
+        "cost": 3,
+        "speed": 2,
+        "gate": 2,
+        "views": 3,
+        "audit": 4,
+        "ease": 4
+      },
+      "tools": [
+        {
+          "name": "MetaGPT",
+          "how": "PM→架构师→工程师 SOP",
+          "kind": "框架"
+        },
+        {
+          "name": "ChatDev",
+          "how": "瀑布式阶段接力",
+          "kind": "框架"
+        },
+        {
+          "name": "CrewAI",
+          "how": "sequential 流程",
+          "kind": "框架"
+        },
+        {
+          "name": "Archon",
+          "how": "YAML 写死步骤",
+          "kind": "第三方"
+        },
+        {
+          "name": "Dify / Coze / n8n",
+          "how": "节点串联工作流",
+          "kind": "平台"
+        }
+      ],
+      "x": 4.1
+    },
+    {
+      "slug": "ma-02-router",
+      "id": "MA-02",
+      "name": "路由分诊",
+      "short": "路由",
+      "topo": "分类器 → 1 位专家",
+      "calls": "2",
+      "secs": 27,
+      "tokens": 3860,
+      "pros": [
+        "只多一次分类调用，成本几乎和单 Agent 一样",
+        "每类问题都交给最合适的专家处理",
+        "加一个新领域，只要加一位专家和一个分类"
+      ],
+      "cons": [
+        "分错类就全错，而且没有纠正机制",
+        "跨领域的问题只能落到一个专家手里",
+        "分类器本身成了单点"
+      ],
+      "fit": [
+        "客服、分诊、多领域问答",
+        "问题类型边界清楚的场景"
+      ],
+      "unfit": [
+        "跨领域的综合问题",
+        "需要多个专家协作的任务"
+      ],
+      "scores": {
+        "cost": 5,
+        "speed": 5,
+        "gate": 1,
+        "views": 2,
+        "audit": 3,
+        "ease": 4
+      },
+      "tools": [
+        {
+          "name": "OpenAI Agents SDK",
+          "how": "triage + handoff",
+          "kind": "框架"
+        },
+        {
+          "name": "Claude Code",
+          "how": "按 description 选 subagent",
+          "kind": "厂商"
+        },
+        {
+          "name": "Multica",
+          "how": "Squad leader 路由派活",
+          "kind": "第三方"
+        },
+        {
+          "name": "Dify / Coze",
+          "how": "问题分类 / 意图识别",
+          "kind": "平台"
+        }
+      ],
+      "x": 1.5
+    },
+    {
+      "slug": "ma-03-parallel",
+      "id": "MA-03",
+      "name": "并行分工",
+      "short": "并行分工",
+      "topo": "3 个固定视角并行 → 汇总",
+      "calls": "4",
+      "secs": 41,
+      "tokens": 8777,
+      "pros": [
+        "多个视角同时进行，墙钟时间约等于最慢的一路",
+        "各路互相看不见，不会被彼此带偏",
+        "视角覆盖面可以事先保证"
+      ],
+      "cons": [
+        "视角是事先定死的，遇到新问题无法调整",
+        "汇总者负担重，容易丢信息",
+        "各路之间不能互相纠错，可能重复"
+      ],
+      "fit": [
+        "多维度分析（技术、商业、风险）",
+        "评审清单类任务"
+      ],
+      "unfit": [
+        "无法事先拆出固定维度的任务",
+        "各部分之间强依赖的任务"
+      ],
+      "scores": {
+        "cost": 3,
+        "speed": 4,
+        "gate": 2,
+        "views": 4,
+        "audit": 3,
+        "ease": 4
+      },
+      "tools": [
+        {
+          "name": "Google ADK",
+          "how": "ParallelAgent",
+          "kind": "框架"
+        },
+        {
+          "name": "MS Agent Framework",
+          "how": "Concurrent 编排",
+          "kind": "框架"
+        },
+        {
+          "name": "LangGraph",
+          "how": "Send 扇出 / map-reduce",
+          "kind": "框架"
+        },
+        {
+          "name": "Dify / n8n",
+          "how": "并行分支",
+          "kind": "平台"
+        }
+      ],
+      "x": 3.5
+    },
+    {
+      "slug": "ma-04-orchestrator",
+      "id": "MA-04",
+      "name": "委派式编排",
+      "short": "委派式",
+      "topo": "编排者动态拆分 → N 个子 Agent → 汇总",
+      "calls": "2+N",
+      "secs": 59,
+      "tokens": 12095,
+      "pros": [
+        "按任务动态拆分，适应性强",
+        "子 Agent 各自使用全新上下文，可以并行",
+        "编排者掌握全局，是各家编码 Agent 的主流做法"
+      ],
+      "cons": [
+        "拆分不清就会重复劳动或遗漏",
+        "没有验收环节，子任务做错也会被直接汇总",
+        "编排者容易成为瓶颈"
+      ],
+      "fit": [
+        "可拆分的调研或写作",
+        "只读的大范围探索（例如搜代码库）"
+      ],
+      "unfit": [
+        "强顺序依赖的任务",
+        "多个子任务要写同一批文件"
+      ],
+      "scores": {
+        "cost": 3,
+        "speed": 3,
+        "gate": 2,
+        "views": 3,
+        "audit": 3,
+        "ease": 3
+      },
+      "tools": [
+        {
+          "name": "Claude Code",
+          "how": "Agent 工具（subagent）",
+          "kind": "厂商"
+        },
+        {
+          "name": "Codex",
+          "how": "spawn_agent",
+          "kind": "厂商"
+        },
+        {
+          "name": "Kimi Code",
+          "how": "Agent Swarm",
+          "kind": "厂商"
+        },
+        {
+          "name": "Hermes Agent",
+          "how": "delegate_task",
+          "kind": "开源"
+        },
+        {
+          "name": "AWS CAO / Paseo",
+          "how": "跨厂商派活",
+          "kind": "第三方"
+        }
+      ],
+      "x": 4.8
+    },
+    {
+      "slug": "ma-05-critic-loop",
+      "id": "MA-05",
+      "name": "生成-评审循环",
+      "short": "生成-评审",
+      "topo": "写 → 评 → 改（最多 2 轮）",
+      "calls": "2~5",
+      "secs": 99,
+      "tokens": 20020,
+      "pros": [
+        "质量逐轮提升，有明确的验收标准",
+        "评审员可以换成另一家更强的模型（跨厂商评审）",
+        "结构简单，容易加到现有流程上"
+      ],
+      "cons": [
+        "标准偏松等于没审，偏严会一直打回、烧钱",
+        "轮数越多越慢、越贵（实测 ×8.0）",
+        "评审员和写手同源时，盲点也相同"
+      ],
+      "fit": [
+        "对质量要求高的单件产出",
+        "有客观标准的任务（代码、测试、格式）"
+      ],
+      "unfit": [
+        "没法给出评审标准的任务",
+        "对延迟敏感的场景"
+      ],
+      "scores": {
+        "cost": 2,
+        "speed": 2,
+        "gate": 4,
+        "views": 2,
+        "audit": 4,
+        "ease": 4
+      },
+      "tools": [
+        {
+          "name": "Claude Code + Codex",
+          "how": "codex-plugin-cc 评审闸门",
+          "kind": "插件"
+        },
+        {
+          "name": "Claude Code",
+          "how": "Stop hook 退出码 2 打回",
+          "kind": "厂商"
+        },
+        {
+          "name": "Orchestrator.inc",
+          "how": "PR 评审 / CI 意见推回",
+          "kind": "第三方"
+        },
+        {
+          "name": "Google ADK",
+          "how": "LoopAgent",
+          "kind": "框架"
+        }
+      ],
+      "x": 8.0
+    },
+    {
+      "slug": "ma-06-debate",
+      "id": "MA-06",
+      "name": "多 Agent 辩论",
+      "short": "辩论",
+      "topo": "主持人 → 正反立论 → 交叉反驳 → 裁判",
+      "calls": "6",
+      "secs": 54,
+      "tokens": 11322,
+      "pros": [
+        "正反对抗，能逼出反例和隐含假设",
+        "裁判看到双方的完整论证再做取舍",
+        "模型异质时，收益更明显"
+      ],
+      "cons": [
+        "容易为了对立而对立",
+        "调用次数多，成本较高",
+        "结论质量高度依赖裁判"
+      ],
+      "fit": [
+        "决策题、方案取舍",
+        "需要暴露风险和反例的评审"
+      ],
+      "unfit": [
+        "有唯一正确答案的事实题",
+        "执行类任务"
+      ],
+      "scores": {
+        "cost": 3,
+        "speed": 3,
+        "gate": 3,
+        "views": 5,
+        "audit": 4,
+        "ease": 3
+      },
+      "tools": [
+        {
+          "name": "MS Agent Framework",
+          "how": "GroupChat 编排",
+          "kind": "框架"
+        },
+        {
+          "name": "Maestro",
+          "how": "Group Chat + moderator",
+          "kind": "第三方"
+        },
+        {
+          "name": "CAMEL",
+          "how": "角色扮演对话",
+          "kind": "框架"
+        },
+        {
+          "name": "Multi-Agent Debate",
+          "how": "Du et al. 2023",
+          "kind": "学术"
+        }
+      ],
+      "x": 4.5
+    },
+    {
+      "slug": "ma-07-voting",
+      "id": "MA-07",
+      "name": "投票集成",
+      "short": "投票",
+      "topo": "3 份独立答卷 → 评委择优融合",
+      "calls": "4",
+      "secs": 42,
+      "tokens": 14139,
+      "pros": [
+        "多份独立答卷，可以抵消单次失误",
+        "结果更稳定，不容易离谱",
+        "答卷可以并行生成，墙钟时间短"
+      ],
+      "cons": [
+        "成本约是单次的 N 倍",
+        "同一个模型的答卷容易同质，越强的模型越容易一起错",
+        "评委选择或融合的能力决定了上限"
+      ],
+      "fit": [
+        "怕出错、需要稳定性的关键答案",
+        "有测试能自动判优的代码任务（best-of-N）"
+      ],
+      "unfit": [
+        "预算紧张的场景",
+        "开放式的长篇创作"
+      ],
+      "scores": {
+        "cost": 2,
+        "speed": 4,
+        "gate": 3,
+        "views": 3,
+        "audit": 3,
+        "ease": 4
+      },
+      "tools": [
+        {
+          "name": "Cursor",
+          "how": "/best-of-n",
+          "kind": "厂商"
+        },
+        {
+          "name": "Codex Cloud",
+          "how": "--attempts 1-4",
+          "kind": "厂商"
+        },
+        {
+          "name": "GitHub Agent HQ",
+          "how": "同一 issue 派给多家",
+          "kind": "平台"
+        },
+        {
+          "name": "llm-council",
+          "how": "Karpathy：互评 + 主席融合",
+          "kind": "开源"
+        }
+      ],
+      "x": 5.6
+    },
+    {
+      "slug": "ma-08-blackboard",
+      "id": "MA-08",
+      "name": "团队协作 · 共享黑板",
+      "short": "共享黑板",
+      "topo": "组长 → 3 人发帖 → 互看回应 → 整合",
+      "calls": "8",
+      "secs": 54,
+      "tokens": 19643,
+      "pros": [
+        "成员之间能互相看见、互相纠错",
+        "讨论过程都留在黑板上，可以追溯",
+        "适合多假设并行排查"
+      ],
+      "cons": [
+        "token 消耗随帖子数增长（实测 ×7.8）",
+        "讨论可能发散、收不住",
+        "多人写同一处时容易互相覆盖"
+      ],
+      "fit": [
+        "多假设排查",
+        "需要互相纠错的设计评审"
+      ],
+      "unfit": [
+        "简单任务",
+        "预算紧张或需要快速出结果的场景"
+      ],
+      "scores": {
+        "cost": 2,
+        "speed": 3,
+        "gate": 3,
+        "views": 5,
+        "audit": 4,
+        "ease": 2
+      },
+      "tools": [
+        {
+          "name": "Claude Code",
+          "how": "Agent Teams 任务表 + 邮箱",
+          "kind": "厂商"
+        },
+        {
+          "name": "Codex",
+          "how": "multi-agent V2 mailbox",
+          "kind": "厂商"
+        },
+        {
+          "name": "Hermes Agent",
+          "how": "Kanban 任务板",
+          "kind": "开源"
+        },
+        {
+          "name": "DeepSeek Harness",
+          "how": "Agent Teams",
+          "kind": "厂商"
+        },
+        {
+          "name": "hcom",
+          "how": "终端间消息总线",
+          "kind": "第三方"
+        },
+        {
+          "name": "Paperclip / Multica",
+          "how": "工单看板 + 原子认领",
+          "kind": "第三方"
+        }
+      ],
+      "x": 7.8
+    },
+    {
+      "slug": "ma-09-contract-gate",
+      "id": "MA-09",
+      "name": "契约编排 + 闸门验证",
+      "short": "契约+闸门",
+      "topo": "规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合",
+      "calls": "约 6+2N",
+      "secs": 208,
+      "tokens": 68390,
+      "pros": [
+        "事前用契约防止重复劳动：写集合不相交，计划用代码校验",
+        "事中隔离执行，事后有规则闸门和独立评审",
+        "单写者整合，避免多人同时写终稿",
+        "全程可追溯，附验收对照表"
+      ],
+      "cons": [
+        "流程最重，成本最高（实测 ×27.3）",
+        "最慢（实测 208s）",
+        "搭建和维护成本高",
+        "简单任务用它很不划算"
+      ],
+      "fit": [
+        "要求结果可靠、可审计的多人协作",
+        "并行开发、批量代码改动"
+      ],
+      "unfit": [
+        "简单任务",
+        "对延迟或预算敏感的场景"
+      ],
+      "scores": {
+        "cost": 1,
+        "speed": 1,
+        "gate": 5,
+        "views": 4,
+        "audit": 5,
+        "ease": 1
+      },
+      "tools": [
+        {
+          "name": "agentguild",
+          "how": "作者的自建系统",
+          "kind": "自建"
+        },
+        {
+          "name": "Kimi Code",
+          "how": "Tower：范围不相交 + 合并检查",
+          "kind": "厂商"
+        },
+        {
+          "name": "Orchestrator.inc",
+          "how": "PR 闭环 + 独立 reviewer",
+          "kind": "第三方"
+        },
+        {
+          "name": "Gas Town",
+          "how": "Refinery 合并队列",
+          "kind": "第三方"
+        },
+        {
+          "name": "Bernstein",
+          "how": "确定性调度 + 合并闸门",
+          "kind": "第三方"
+        },
+        {
+          "name": "Cursor",
+          "how": "planner→worker→judge",
+          "kind": "厂商"
+        }
+      ],
+      "x": 27.3
+    }
+  ]
+}

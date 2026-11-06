@@ -15,11 +15,6 @@
    "id": "r2",
    "label": "第 2 轮 · 交叉反驳",
    "style": "dashed"
-  },
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
   }
  ],
  "nodes": [
@@ -91,46 +86,6 @@
    "icon": "check",
    "row": 2,
    "col": 5
-  },
-  {
-   "id": "tool0",
-   "label": "MS Agent Framework",
-   "sub": "GroupChat 编排",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 1
-  },
-  {
-   "id": "tool1",
-   "label": "Maestro",
-   "sub": "Group Chat + moderator",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 2
-  },
-  {
-   "id": "tool2",
-   "label": "CAMEL",
-   "sub": "角色扮演对话",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 3
-  },
-  {
-   "id": "tool3",
-   "label": "Multi-Agent Debate",
-   "sub": "Du et al. 2023",
-   "tag": "学术",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 4
   }
  ],
  "edges": [
@@ -208,12 +163,8 @@
    },
    "default": {
     "label": "调用 / 数据流"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful"
+ "watermark": false
 }

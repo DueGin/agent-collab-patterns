@@ -1,16 +1,93 @@
-<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>多 Agent 协作模式图解</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap"><style>:root{--sc-paper:#f6f5f1;--sc-paper-2:#eceae4;--sc-ink:#1d2433;--sc-ink-strong:#0b0f19;--sc-muted:#4a5568;--sc-soft:#8a93a6;--sc-rule:rgba(29,36,51,0.12);--sc-rule-solid:#c9ccd3;--sc-accent:#2f54eb;--sc-accent-tint:rgba(47,84,235,0.08);--sc-link:#0f7f81;--sc-node:#ffffff;--sc-store:rgba(29,36,51,0.05);--sc-external:rgba(29,36,51,0.025);--sc-series-1:#6b8f71;--sc-series-2:#c08a3e;--sc-series-3:#8a6fb0;--sc-series-4:#b5604b;--sc-series-5:#5f7f9e;--sc-ax-shade:#1d2433;--sc-ax-lift:#ffffff;--sc-ax-screen:#2b3040;--sc-ax-dark-edge:rgba(255,255,255,0);--sc-ax-t-o:0;--sc-ax-l-o:0.07;--sc-ax-r-o:0.16;--sc-on-v00:#000000;--sc-on-v01:#000000;--sc-on-v10:#ffffff;--sc-on-v11:#ffffff;--sc-font-serif:'Fraunces', 'Noto Serif', Georgia, serif;--sc-font-sans:'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;--sc-font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;}
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>多 Agent 协作模式图解</title><script>(function(){try{var t=localStorage.getItem('seecode:theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;1,9..144,400&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=IBM+Plex+Mono:wght@400;500&amp;display=swap">
+<style>:root{--sc-paper:#f6f5f1;--sc-paper-2:#eceae4;--sc-ink:#1d2433;--sc-ink-strong:#0b0f19;--sc-muted:#4a5568;--sc-soft:#8a93a6;--sc-rule:rgba(29,36,51,0.12);--sc-rule-solid:#c9ccd3;--sc-accent:#2f54eb;--sc-accent-tint:rgba(47,84,235,0.08);--sc-link:#0f7f81;--sc-node:#ffffff;--sc-store:rgba(29,36,51,0.05);--sc-external:rgba(29,36,51,0.025);--sc-series-1:#6b8f71;--sc-series-2:#c08a3e;--sc-series-3:#8a6fb0;--sc-series-4:#b5604b;--sc-series-5:#5f7f9e;--sc-ax-shade:#1d2433;--sc-ax-lift:#ffffff;--sc-ax-screen:#2b3040;--sc-ax-dark-edge:rgba(255,255,255,0);--sc-ax-t-o:0;--sc-ax-l-o:0.07;--sc-ax-r-o:0.16;--sc-on-v00:#000000;--sc-on-v01:#000000;--sc-on-v10:#ffffff;--sc-on-v11:#ffffff;--sc-font-serif:'Fraunces', 'Noto Serif', Georgia, serif;--sc-font-sans:'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;--sc-font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;}
 :root[data-theme="dark"]{--sc-paper:#1a1a1a;--sc-paper-2:#222222;--sc-ink:#e8e6e3;--sc-ink-strong:#f7f6f4;--sc-muted:#a9a6a1;--sc-soft:#75726e;--sc-rule:rgba(232,230,227,0.12);--sc-rule-solid:rgba(232,230,227,0.24);--sc-accent:#7b93ff;--sc-accent-tint:rgba(123,147,255,0.14);--sc-link:#3cc6c4;--sc-node:#202020;--sc-store:rgba(232,230,227,0.05);--sc-external:rgba(232,230,227,0.025);--sc-series-1:#8fb394;--sc-series-2:#d9a95f;--sc-series-3:#a993cc;--sc-series-4:#d0806b;--sc-series-5:#86a5c4;--sc-ax-shade:#000000;--sc-ax-lift:#ffffff;--sc-ax-screen:#07080b;--sc-ax-dark-edge:rgba(255,255,255,0.34);--sc-ax-t-o:0.06;--sc-ax-l-o:0.2;--sc-ax-r-o:0.42;--sc-on-v00:#000000;--sc-on-v01:#ffffff;--sc-on-v10:#000000;--sc-on-v11:#ffffff;--sc-font-serif:'Fraunces', 'Noto Serif', Georgia, serif;--sc-font-sans:'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;--sc-font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sc-paper:#1a1a1a;--sc-paper-2:#222222;--sc-ink:#e8e6e3;--sc-ink-strong:#f7f6f4;--sc-muted:#a9a6a1;--sc-soft:#75726e;--sc-rule:rgba(232,230,227,0.12);--sc-rule-solid:rgba(232,230,227,0.24);--sc-accent:#7b93ff;--sc-accent-tint:rgba(123,147,255,0.14);--sc-link:#3cc6c4;--sc-node:#202020;--sc-store:rgba(232,230,227,0.05);--sc-external:rgba(232,230,227,0.025);--sc-series-1:#8fb394;--sc-series-2:#d9a95f;--sc-series-3:#a993cc;--sc-series-4:#d0806b;--sc-series-5:#86a5c4;--sc-ax-shade:#000000;--sc-ax-lift:#ffffff;--sc-ax-screen:#07080b;--sc-ax-dark-edge:rgba(255,255,255,0.34);--sc-ax-t-o:0.06;--sc-ax-l-o:0.2;--sc-ax-r-o:0.42;--sc-on-v00:#000000;--sc-on-v01:#ffffff;--sc-on-v10:#000000;--sc-on-v11:#ffffff;--sc-font-serif:'Fraunces', 'Noto Serif', Georgia, serif;--sc-font-sans:'IBM Plex Sans', 'Noto Sans', system-ui, sans-serif;--sc-font-mono:'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;}}
-*{box-sizing:border-box;margin:0}body{background:var(--sc-paper);color:var(--sc-ink);font-family:var(--sc-font-sans);padding:48px 24px}
-main{max-width:1240px;margin:0 auto}h1{font-family:var(--sc-font-serif);font-weight:400;font-size:36px}p.lead{color:var(--sc-muted);margin:8px 0 24px}
-ol{list-style:none;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;counter-reset:d}
-li{counter-increment:d}a.card{display:block;text-decoration:none;color:inherit;border:1px solid var(--sc-rule);border-radius:10px;overflow:hidden;background:var(--sc-paper)}
-a.card:hover,a.card:focus-visible{border-color:var(--sc-accent);outline:none}
-iframe{width:200%;height:420px;border:0;transform:scale(.5);transform-origin:0 0;margin-bottom:-210px;pointer-events:none;display:block}
-.meta{display:flex;gap:10px;align-items:baseline;padding:10px 12px;border-top:1px solid var(--sc-rule)}.meta::before{content:counter(d,decimal-leading-zero);font:500 11px var(--sc-font-mono);color:var(--sc-soft)}
-.meta b{font-weight:600;font-size:13px;flex:1}.meta code{font:11px var(--sc-font-mono);color:var(--sc-soft)}
-@media (max-width:640px){body{padding:28px 16px}}</style></head><body><main><h1>多 Agent 协作模式图解</h1>
-<p class="lead">10 种常见的多 Agent 协作模式，每种一张可交互的动画图：拓扑、主路径、同一任务的实测成本，以及市面上遵循该模式的代表工具（2026-10）。点开任意一张：悬停追踪、点击聚焦、◀ ▶ 单步播放。 源文件与说明见 <a href="https://github.com/DueGin/agent-collab-patterns">GitHub</a>。</p>
-<ol><li><a class="card" href="ma-00-single.html"><iframe src="ma-00-single.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="单 Agent 基线"></iframe><div class="meta"><b>单 Agent 基线</b><code>architecture</code></div></a></li><li><a class="card" href="ma-01-pipeline.html"><iframe src="ma-01-pipeline.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="顺序流水线"></iframe><div class="meta"><b>顺序流水线</b><code>architecture</code></div></a></li><li><a class="card" href="ma-02-router.html"><iframe src="ma-02-router.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="路由分诊"></iframe><div class="meta"><b>路由分诊</b><code>flowchart</code></div></a></li><li><a class="card" href="ma-03-parallel.html"><iframe src="ma-03-parallel.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="并行分工"></iframe><div class="meta"><b>并行分工</b><code>architecture</code></div></a></li><li><a class="card" href="ma-04-orchestrator.html"><iframe src="ma-04-orchestrator.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="委派式编排"></iframe><div class="meta"><b>委派式编排</b><code>architecture</code></div></a></li><li><a class="card" href="ma-05-critic-loop.html"><iframe src="ma-05-critic-loop.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="生成-评审循环"></iframe><div class="meta"><b>生成-评审循环</b><code>flowchart</code></div></a></li><li><a class="card" href="ma-06-debate.html"><iframe src="ma-06-debate.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="多 Agent 辩论"></iframe><div class="meta"><b>多 Agent 辩论</b><code>architecture</code></div></a></li><li><a class="card" href="ma-07-voting.html"><iframe src="ma-07-voting.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="投票集成"></iframe><div class="meta"><b>投票集成</b><code>architecture</code></div></a></li><li><a class="card" href="ma-08-blackboard.html"><iframe src="ma-08-blackboard.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="团队协作 · 共享黑板"></iframe><div class="meta"><b>团队协作 · 共享黑板</b><code>architecture</code></div></a></li><li><a class="card" href="ma-09-contract-gate.html"><iframe src="ma-09-contract-gate.html?motion=still&amp;embed=1&amp;theme=light" loading="lazy" tabindex="-1" title="契约编排 + 闸门验证"></iframe><div class="meta"><b>契约编排 + 闸门验证</b><code>flowchart</code></div></a></li></ol>
-</main></body></html>
+*{box-sizing:border-box}body{margin:0;background:var(--sc-paper);color:var(--sc-ink);font-family:var(--sc-font-sans);line-height:1.5}
+main{max-width:1240px;margin:0 auto;padding:44px 24px 64px}
+a{color:var(--sc-accent)}
+.top{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 20px}
+.top h1{font-family:var(--sc-font-serif);font-weight:400;font-size:36px;margin:0;flex:1;min-width:260px}
+.top nav{display:flex;gap:8px;align-items:center;font-size:13px}
+.top nav a,.top nav button{color:var(--sc-muted);text-decoration:none;border:1px solid var(--sc-rule);border-radius:6px;padding:4px 10px;background:none;font:inherit;cursor:pointer}
+.top nav a:hover,.top nav button:hover,.top nav a:focus-visible,.top nav button:focus-visible{color:var(--sc-ink);border-color:var(--sc-accent);outline:none}
+.top nav a.cur{color:var(--sc-ink);border-color:var(--sc-ink)}
+p.lead{color:var(--sc-muted);margin:10px 0 28px;max-width:860px}
+h2{font-family:var(--sc-font-serif);font-weight:400;font-size:24px;margin:44px 0 6px}
+p.sub{color:var(--sc-muted);font-size:13px;margin:0 0 16px}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);color:var(--sc-soft);font-size:12px}
+.th-dark{display:none}
+[data-theme="dark"] .th-dark{display:block}[data-theme="dark"] .th-light{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .th-dark{display:block}:root:not([data-theme="light"]) .th-light{display:none}}
+@media (max-width:640px){main{padding:28px 16px 48px}.top h1{font-size:28px}}
+.dots{display:inline-flex;gap:3px;vertical-align:middle}.dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--sc-soft);box-sizing:border-box}.dots i.on{background:var(--sc-ink);border-color:var(--sc-ink)}
+.grid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
+.card{display:flex;flex-direction:column;height:100%;text-decoration:none;color:inherit;border:1px solid var(--sc-rule);border-radius:10px;overflow:hidden}
+.card:hover,.card:focus-visible{border-color:var(--sc-accent);outline:none}
+.thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;padding:12px;border-bottom:1px solid var(--sc-rule);overflow:hidden}
+.thumb img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.id{font:12px var(--sc-font-mono);color:var(--sc-soft)}
+.body h3{margin:0;font-size:17px;font-weight:600}
+.topo{margin:0;font-size:13px;color:var(--sc-muted)}
+.st{display:flex;gap:14px;font:12px var(--sc-font-mono);color:var(--sc-muted);margin:2px 0}
+.pm{margin:0;font-size:13px;line-height:1.6}.pm b{font-weight:600}
+.tl{margin:auto 0 0;padding-top:8px;font-size:12px;color:var(--sc-soft);line-height:1.6}</style></head><body><main><header class="top"><h1>多 Agent 协作模式图解</h1><nav aria-label="站点导航">
+<a href="./" class="cur" aria-current="page">全部模式</a>
+<a href="compare.html">纵向对比</a>
+<a href="https://github.com/DueGin/agent-collab-patterns">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header><p class="lead">10 种常见的多 Agent 协作模式，每种一张可交互的动画图（悬停追踪、点击聚焦、◀ ▶ 单步）。每张图下方列出优劣和市面上遵循该模式的工具；想横向比较成本、速度、质量把关，看 <a href="compare.html">纵向对比</a>。</p><ol class="grid"><li><a class="card" href="ma-00-single.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-00-single-light.png" alt="单 Agent 基线 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-00-single-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-00</span><h3>单 Agent 基线</h3><p class="topo">一个 Agent 一次完成</p>
+<div class="st"><span>调用 1</span><span>24s</span><span>2.5K tokens ×1.0</span></div>
+<p class="pm"><b>＋</b> 成本和延迟都最低，是其它模式的对照组</p><p class="pm"><b>－</b> 只有一个视角，没有任何自检</p>
+<p class="tl">Claude Code / Codex · Cursor / Copilot · ChatGPT / Claude</p></div></a></li><li><a class="card" href="ma-01-pipeline.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-01-pipeline-light.png" alt="顺序流水线 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-01-pipeline-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-01</span><h3>顺序流水线</h3><p class="topo">研究员 → 撰稿人 → 编辑</p>
+<div class="st"><span>调用 3</span><span>72s</span><span>10.2K tokens ×4.1</span></div>
+<p class="pm"><b>＋</b> 角色分工清晰，每一棒只做一件事</p><p class="pm"><b>－</b> 传话失真：每一棒只看到上一棒的产出</p>
+<p class="tl">MetaGPT · ChatDev · CrewAI · Archon · Dify / Coze / n8n</p></div></a></li><li><a class="card" href="ma-02-router.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-02-router-light.png" alt="路由分诊 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-02-router-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-02</span><h3>路由分诊</h3><p class="topo">分类器 → 1 位专家</p>
+<div class="st"><span>调用 2</span><span>27s</span><span>3.9K tokens ×1.5</span></div>
+<p class="pm"><b>＋</b> 只多一次分类调用，成本几乎和单 Agent 一样</p><p class="pm"><b>－</b> 分错类就全错，而且没有纠正机制</p>
+<p class="tl">OpenAI Agents SDK · Claude Code · Multica · Dify / Coze</p></div></a></li><li><a class="card" href="ma-03-parallel.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-03-parallel-light.png" alt="并行分工 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-03-parallel-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-03</span><h3>并行分工</h3><p class="topo">3 个固定视角并行 → 汇总</p>
+<div class="st"><span>调用 4</span><span>41s</span><span>8.8K tokens ×3.5</span></div>
+<p class="pm"><b>＋</b> 多个视角同时进行，墙钟时间约等于最慢的一路</p><p class="pm"><b>－</b> 视角是事先定死的，遇到新问题无法调整</p>
+<p class="tl">Google ADK · MS Agent Framework · LangGraph · Dify / n8n</p></div></a></li><li><a class="card" href="ma-04-orchestrator.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-04-orchestrator-light.png" alt="委派式编排 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-04-orchestrator-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-04</span><h3>委派式编排</h3><p class="topo">编排者动态拆分 → N 个子 Agent → 汇总</p>
+<div class="st"><span>调用 2+N</span><span>59s</span><span>12.1K tokens ×4.8</span></div>
+<p class="pm"><b>＋</b> 按任务动态拆分，适应性强</p><p class="pm"><b>－</b> 拆分不清就会重复劳动或遗漏</p>
+<p class="tl">Claude Code · Codex · Kimi Code · Hermes Agent · AWS CAO / Paseo</p></div></a></li><li><a class="card" href="ma-05-critic-loop.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-05-critic-loop-light.png" alt="生成-评审循环 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-05-critic-loop-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-05</span><h3>生成-评审循环</h3><p class="topo">写 → 评 → 改（最多 2 轮）</p>
+<div class="st"><span>调用 2~5</span><span>99s</span><span>20.0K tokens ×8.0</span></div>
+<p class="pm"><b>＋</b> 质量逐轮提升，有明确的验收标准</p><p class="pm"><b>－</b> 标准偏松等于没审，偏严会一直打回、烧钱</p>
+<p class="tl">Claude Code + Codex · Claude Code · Orchestrator.inc · Google ADK</p></div></a></li><li><a class="card" href="ma-06-debate.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-06-debate-light.png" alt="多 Agent 辩论 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-06-debate-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-06</span><h3>多 Agent 辩论</h3><p class="topo">主持人 → 正反立论 → 交叉反驳 → 裁判</p>
+<div class="st"><span>调用 6</span><span>54s</span><span>11.3K tokens ×4.5</span></div>
+<p class="pm"><b>＋</b> 正反对抗，能逼出反例和隐含假设</p><p class="pm"><b>－</b> 容易为了对立而对立</p>
+<p class="tl">MS Agent Framework · Maestro · CAMEL · Multi-Agent Debate</p></div></a></li><li><a class="card" href="ma-07-voting.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-07-voting-light.png" alt="投票集成 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-07-voting-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-07</span><h3>投票集成</h3><p class="topo">3 份独立答卷 → 评委择优融合</p>
+<div class="st"><span>调用 4</span><span>42s</span><span>14.1K tokens ×5.6</span></div>
+<p class="pm"><b>＋</b> 多份独立答卷，可以抵消单次失误</p><p class="pm"><b>－</b> 成本约是单次的 N 倍</p>
+<p class="tl">Cursor · Codex Cloud · GitHub Agent HQ · llm-council</p></div></a></li><li><a class="card" href="ma-08-blackboard.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-08-blackboard-light.png" alt="团队协作 · 共享黑板 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-08-blackboard-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-08</span><h3>团队协作 · 共享黑板</h3><p class="topo">组长 → 3 人发帖 → 互看回应 → 整合</p>
+<div class="st"><span>调用 8</span><span>54s</span><span>19.6K tokens ×7.8</span></div>
+<p class="pm"><b>＋</b> 成员之间能互相看见、互相纠错</p><p class="pm"><b>－</b> token 消耗随帖子数增长（实测 ×7.8）</p>
+<p class="tl">Claude Code · Codex · Hermes Agent · DeepSeek Harness · hcom · Paperclip / Multica</p></div></a></li><li><a class="card" href="ma-09-contract-gate.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-09-contract-gate-light.png" alt="契约编排 + 闸门验证 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-09-contract-gate-dark.png" alt="" loading="lazy"></div>
+<div class="body"><span class="id">MA-09</span><h3>契约编排 + 闸门验证</h3><p class="topo">规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合</p>
+<div class="st"><span>调用 约 6+2N</span><span>208s</span><span>68.4K tokens ×27.3</span></div>
+<p class="pm"><b>＋</b> 事前用契约防止重复劳动：写集合不相交，计划用代码校验</p><p class="pm"><b>－</b> 流程最重，成本最高（实测 ×27.3）</p>
+<p class="tl">agentguild · Kimi Code · Orchestrator.inc · Gas Town · Bernstein · Cursor</p></div></a></li></ol><footer>实测：2026-11-06 在 Dify 1.17.1 上同一任务各跑 1 次（执行 deepseek-v4.1-flash，评审 claude-sonnet-5-5），看量级即可。
+评分是作者的定性判断，不是测量结果。代表工具为 2026-10 调研时的状态，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer></main><script>(function(){var b=document.getElementById('theme-btn');if(!b)return;var r=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');
+function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':m.matches;}function sync(){b.setAttribute('aria-checked',String(dark()));b.textContent=dark()?'浅色':'深色';}
+b.addEventListener('click',function(){var t=dark()?'light':'dark';r.setAttribute('data-theme',t);try{localStorage.setItem('seecode:theme',t);}catch(e){}sync();});
+m.addEventListener&&m.addEventListener('change',sync);sync();})();</script></body></html>

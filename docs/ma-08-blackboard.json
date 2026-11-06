@@ -10,11 +10,6 @@
    "id": "team",
    "label": "队友 · 2 轮发帖",
    "style": "dashed"
-  },
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
   }
  ],
  "nodes": [
@@ -82,66 +77,6 @@
    "kind": "external",
    "icon": "check",
    "row": 1,
-   "col": 5
-  },
-  {
-   "id": "tool0",
-   "label": "Claude Code",
-   "sub": "Agent Teams 任务表 + 邮箱",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "Codex",
-   "sub": "multi-agent V2 mailbox",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "Hermes Agent",
-   "sub": "Kanban 任务板",
-   "tag": "开源",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "DeepSeek Harness",
-   "sub": "Agent Teams",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 3
-  },
-  {
-   "id": "tool4",
-   "label": "hcom",
-   "sub": "终端间消息总线",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 4
-  },
-  {
-   "id": "tool5",
-   "label": "Paperclip / Multica",
-   "sub": "工单看板 + 原子认领",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
    "col": 5
   }
  ],
@@ -217,12 +152,8 @@
    },
    "default": {
     "label": "调用 / 数据流"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful"
+ "watermark": false
 }

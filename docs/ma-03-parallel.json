@@ -10,11 +10,6 @@
    "id": "par",
    "label": "并行 · 互相看不见",
    "style": "dashed"
-  },
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
   }
  ],
  "nodes": [
@@ -68,46 +63,6 @@
    "kind": "external",
    "icon": "check",
    "row": 1,
-   "col": 3
-  },
-  {
-   "id": "tool0",
-   "label": "Google ADK",
-   "sub": "ParallelAgent",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "MS Agent Framework",
-   "sub": "Concurrent 编排",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "LangGraph",
-   "sub": "Send 扇出 / map-reduce",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "Dify / n8n",
-   "sub": "并行分支",
-   "tag": "平台",
-   "kind": "muted",
-   "group": "tools",
-   "row": 3,
    "col": 3
   }
  ],
@@ -165,12 +120,8 @@
    },
    "default": {
     "label": "调用 / 数据流"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful"
+ "watermark": false
 }

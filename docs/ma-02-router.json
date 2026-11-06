@@ -62,46 +62,6 @@
    "kind": "external",
    "row": 1,
    "col": 3
-  },
-  {
-   "id": "tool0",
-   "label": "OpenAI Agents SDK",
-   "sub": "triage + handoff",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 4,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "Claude Code",
-   "sub": "按 description 选 subagent",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 4,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "Multica",
-   "sub": "Squad leader 路由派活",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 4,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "Dify / Coze",
-   "sub": "问题分类 / 意图识别",
-   "tag": "平台",
-   "kind": "muted",
-   "group": "tools",
-   "row": 4,
-   "col": 3
   }
  ],
  "edges": [
@@ -181,21 +141,10 @@
    "primary": {
     "label": "主路径"
    },
-   "muted": {
-    "label": "代表工具"
-   },
    "async": {
     "label": "未走到的路径"
    }
   }
  },
- "watermark": false,
- "budget": "faithful",
- "groups": [
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
-  }
- ]
+ "watermark": false
 }

@@ -60,46 +60,6 @@
    "kind": "external",
    "row": 4,
    "col": 1
-  },
-  {
-   "id": "tool0",
-   "label": "Claude Code + Codex",
-   "sub": "codex-plugin-cc 评审闸门",
-   "tag": "插件",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "Claude Code",
-   "sub": "Stop hook 退出码 2 打回",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "Orchestrator.inc",
-   "sub": "PR 评审 / CI 意见推回",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "Google ADK",
-   "sub": "LoopAgent",
-   "tag": "框架",
-   "kind": "muted",
-   "group": "tools",
-   "row": 5,
-   "col": 3
   }
  ],
  "edges": [
@@ -168,19 +128,8 @@
    },
    "default": {
     "label": "调用 / 数据流"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
- "watermark": false,
- "budget": "faithful",
- "groups": [
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
-  }
- ]
+ "watermark": false
 }

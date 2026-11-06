@@ -21,11 +21,6 @@
    "id": "post",
    "label": "事后 · 闸门验证",
    "style": "dashed"
-  },
-  {
-   "id": "tools",
-   "label": "市面上遵循此模式的工具（2026-10）",
-   "style": "dashed"
   }
  ],
  "nodes": [
@@ -163,66 +158,6 @@
    "kind": "external",
    "row": 10,
    "col": 1
-  },
-  {
-   "id": "tool0",
-   "label": "agentguild",
-   "sub": "作者的自建系统",
-   "tag": "自建",
-   "kind": "muted",
-   "group": "tools",
-   "row": 11,
-   "col": 0
-  },
-  {
-   "id": "tool1",
-   "label": "Kimi Code",
-   "sub": "Tower：范围不相交 + 合并检查",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 11,
-   "col": 1
-  },
-  {
-   "id": "tool2",
-   "label": "Orchestrator.inc",
-   "sub": "PR 闭环 + 独立 reviewer",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 11,
-   "col": 2
-  },
-  {
-   "id": "tool3",
-   "label": "Gas Town",
-   "sub": "Refinery 合并队列",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 12,
-   "col": 0
-  },
-  {
-   "id": "tool4",
-   "label": "Bernstein",
-   "sub": "确定性调度 + 合并闸门",
-   "tag": "第三方",
-   "kind": "muted",
-   "group": "tools",
-   "row": 12,
-   "col": 1
-  },
-  {
-   "id": "tool5",
-   "label": "Cursor",
-   "sub": "planner→worker→judge",
-   "tag": "厂商",
-   "kind": "muted",
-   "group": "tools",
-   "row": 12,
-   "col": 2
   }
  ],
  "edges": [
@@ -346,9 +281,6 @@
    },
    "default": {
     "label": "调用 / 数据流"
-   },
-   "muted": {
-    "label": "代表工具"
    }
   }
  },
