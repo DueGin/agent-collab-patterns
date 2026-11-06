@@ -13,12 +13,12 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const docs = process.argv[2] || join(root, 'docs');
 const data = JSON.parse(readFileSync(join(root, 'data', 'patterns.json'), 'utf8'));
-const { patterns, ratings, scenarios, measured } = data;
+const { patterns, scenarios, measured, structure, notes } = data;
 const { skinCss, FONTS_HREF } = await import(pathToFileURL(join(root, '.seecode/skills/seecode/scripts/lib/tokens.mjs')).href);
 
 const REPO = 'https://github.com/DueGin/agent-collab-patterns';
 const SITE_TITLE = '多 Agent 协作模式图解';
-const DIMS = ratings.dims; // [[key, label], ...]
+const COLS = structure.cols; // [[key, label], ...] structural attributes
 const byId = Object.fromEntries(patterns.map((p) => [p.id, p]));
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -34,10 +34,12 @@ function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':m.matches
 b.addEventListener('click',function(){var t=dark()?'light':'dark';r.setAttribute('data-theme',t);try{localStorage.setItem('seecode:theme',t);}catch(e){}sync();});
 m.addEventListener&&m.addEventListener('change',sync);sync();})();`;
 
-const dots = (n, label) => `<span class="dots" role="img" aria-label="${esc(label)} ${n}/5">${[1, 2, 3, 4, 5].map((i) => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span>`;
+const callsText = (p) => p.calls + (p.calls_run !== p.calls ? `（本次 ${p.calls_run}）` : '');
+const paras = (xs) => xs.map((x) => `<p>${x}</p>`).join(''); // notes are trusted HTML from our own data file
 
 // ---------- shared CSS ----------
-const DOT_CSS = `.dots{display:inline-flex;gap:3px;vertical-align:middle}.dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--sc-soft);box-sizing:border-box}.dots i.on{background:var(--sc-ink);border-color:var(--sc-ink)}`;
+const FACTS_CSS = `.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
+.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}`;
 
 const PAGE_CSS = `
 .pn{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 20px;font-size:13px}
@@ -62,7 +64,7 @@ const PAGE_CSS = `
 .sc-tools .how{display:block;font:12px var(--sc-font-mono);color:var(--sc-muted);margin-top:2px}
 .pn-foot{margin-top:28px}
 .sc-full .pn,.sc-full .pc,.sc-full .sc-tools{display:none}
-${DOT_CSS}`;
+${FACTS_CSS}`;
 
 const SITE_CSS = `
 *{box-sizing:border-box}body{margin:0;background:var(--sc-paper);color:var(--sc-ink);font-family:var(--sc-font-sans);line-height:1.5}
@@ -82,7 +84,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);colo
 [data-theme="dark"] .th-dark{display:block}[data-theme="dark"] .th-light{display:none}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .th-dark{display:block}:root:not([data-theme="light"]) .th-light{display:none}}
 @media (max-width:640px){main{padding:28px 16px 48px}.top h1{font-size:28px}}
-${DOT_CSS}`;
+${FACTS_CSS}`;
 
 const head = (title, extraCss) => `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>${THEME_BOOT}
@@ -95,7 +97,7 @@ const topBar = (title, current) => `<header class="top"><h1>${esc(title)}</h1><n
 <a href="${REPO}">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header>`;
 
 const footer = `<footer>实测：${esc(measured.date)} 在 ${esc(measured.platform)} 上同一任务各跑 ${measured.runs} 次（执行 ${esc(measured.executor)}，评审 ${esc(measured.reviewer)}），看量级即可。
-评分是作者的定性判断，不是测量结果。代表工具为 2026-10 调研时的状态，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer>`;
+优劣是按实现结构和公开研究归纳的，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer>`;
 
 const tail = (js = '') => `${footer}</main><script>${THEME_TOGGLE_JS}${js}</script></body></html>\n`;
 
@@ -111,13 +113,14 @@ patterns.forEach((p, i) => {
     + (next ? `<a href="${next.slug}.html" title="${esc(next.name)}">${esc(next.id)} ›</a>` : '')
     + `<span class="sp"></span><a href="compare.html">纵向对比 →</a></nav>`;
   const li = (xs) => xs.map((x) => `<li>${esc(x)}</li>`).join('');
-  const rt = DIMS.map(([k, label]) => `<span>${esc(label)} ${dots(p.scores[k], label)}</span>`).join('');
+  const facts = [['模型调用', callsText(p)], ...COLS.map(([k, l]) => [l, p[k]])];
+  const rt = `<dl class="facts" aria-label="结构特征">${facts.map(([l, v]) => `<div><dt>${esc(l)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
   const pc = `<section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g">`
     + `<div class="c"><h3>＋ 优势</h3><ul>${li(p.pros)}</ul><p class="when"><b>适合：</b>${p.fit.map(esc).join('；')}</p></div>`
     + `<div class="c"><h3>－ 劣势</h3><ul>${li(p.cons)}</ul><p class="when"><b>不适合：</b>${p.unfit.map(esc).join('；')}</p></div></div>`
-    + `<div class="rt">${rt}<a href="compare.html#matrix">与其它模式对比 →</a></div></section>`;
+    + rt + `<p class="rt"><a href="compare.html#matrix">和其它模式的结构对比 →</a></p></section>`;
   const tools = `<section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2>`
-    + `<p class="note">2026-10 调研时的状态。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点。</p><ul>`
+    + `<p class="note">2026-11-06 对照官方文档和仓库核实。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点；标"实验""预览"的是厂商尚未正式发布的功能。</p><ul>`
     + p.tools.map((t) => `<li><span class="k">${esc(t.kind)}</span><b>${esc(t.name)}</b><span class="how">${esc(t.how)}</span></li>`).join('')
     + `</ul></section>`;
   let h = strip(readFileSync(file, 'utf8'));
@@ -146,24 +149,28 @@ const INDEX_CSS = `
 const card = (p) => `<li><a class="card" href="${p.slug}.html">
 <div class="thumb"><img class="th-light" src="thumbs/${p.slug}-light.png" alt="${esc(p.name)} 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/${p.slug}-dark.png" alt="" loading="lazy"></div>
 <div class="body"><span class="id">${esc(p.id)}</span><h3>${esc(p.name)}</h3><p class="topo">${esc(p.topo)}</p>
-<div class="st"><span>调用 ${esc(p.calls)}</span><span>${p.secs}s</span><span>${kTokens(p.tokens)} tokens ${fmtX(p.x)}</span></div>
+<div class="st"><span>调用 ${esc(p.calls)}</span><span>串行 ${esc(p.rounds)} 轮</span><span>${p.secs}s</span><span>${kTokens(p.tokens)} tokens ${fmtX(p.x)}</span></div>
 <p class="pm"><b>＋</b> ${esc(p.pros[0])}</p><p class="pm"><b>－</b> ${esc(p.cons[0])}</p>
 <p class="tl">${p.tools.map((t) => esc(t.name)).join(' · ')}</p></div></a></li>`;
 
 writeFileSync(join(docs, 'index.html'), head(SITE_TITLE, INDEX_CSS)
   + topBar(SITE_TITLE, 'index')
   + `<p class="lead">10 种常见的多 Agent 协作模式，每种一张可交互的动画图（悬停追踪、点击聚焦、◀ ▶ 单步）。每张图下方列出优劣和市面上遵循该模式的工具；`
-  + `想横向比较成本、速度、质量把关，看 <a href="compare.html">纵向对比</a>。</p>`
+  + `想比较实测成本和结构差异，看 <a href="compare.html">纵向对比</a>。</p>`
   + `<ol class="grid">${patterns.map(card).join('')}</ol>` + tail());
 
 // ---------- 3. compare ----------
-const AXES = { secs: { max: 240, ticks: [0, 60, 120, 180, 240], fmt: (v) => `${v}s` }, tokens: { max: 80000, ticks: [0, 20000, 40000, 60000, 80000], fmt: (v) => (v ? `${v / 1000}K` : '0') } };
+const AXES = {
+  secs: { max: 240, ticks: [0, 60, 120, 180, 240], fmt: (v) => `${v}s`, label: (v) => `${v}s`, tip: (v) => `${v} 秒` },
+  tokens: { max: 80000, ticks: [0, 20000, 40000, 60000, 80000], fmt: (v) => (v ? `${v / 1000}K` : '0'), label: (v, p) => `${kTokens(v)} ${fmtX(p.x)}`, tip: (v, p) => `${v.toLocaleString('en-US')} tokens（${fmtX(p.x)}）` },
+  final_cjk: { max: 4000, ticks: [0, 1000, 2000, 3000, 4000], fmt: (v) => (v ? `${v / 1000}K` : '0'), label: (v) => `${v.toLocaleString('en-US')} 字`, tip: (v) => `最终答案约 ${v.toLocaleString('en-US')} 个汉字` },
+};
 const barChart = (key, title, sub) => {
   const ax = AXES[key];
   const rows = patterns.map((p) => {
     const v = p[key], w = (v / ax.max) * 100;
-    const label = key === 'secs' ? `${v}s` : `${kTokens(v)} ${fmtX(p.x)}`;
-    const tip = key === 'secs' ? `${v} 秒` : `${v.toLocaleString('en-US')} tokens（${fmtX(p.x)}）`;
+    const label = ax.label(v, p);
+    const tip = ax.tip(v, p);
     return `<div class="row"><a class="nm" href="${p.slug}.html"><span>${esc(p.id)}</span>${esc(p.short)}</a>`
       + `<div class="track"><span class="bar" tabindex="0" style="width:${w.toFixed(2)}%" data-v="${esc(tip)}" data-n="${esc(p.id + ' ' + p.name)}" aria-label="${esc(p.id + ' ' + p.name + '：' + tip)}"></span><span class="val">${esc(label)}</span></div></div>`;
   }).join('');
@@ -172,7 +179,11 @@ const barChart = (key, title, sub) => {
 };
 
 const COMPARE_CSS = `
-.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:20px}
+.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
+.callout{margin:20px 0 0;padding:14px 18px;border:1px solid var(--sc-rule);border-left:3px solid var(--sc-accent);border-radius:8px;font-size:14px;line-height:1.75}
+.callout h3{margin:0 0 6px;font-size:15px}.callout p{margin:6px 0}
+.callout ul{margin:6px 0;padding-left:20px}
+td.w{min-width:200px;color:var(--sc-ink)}
 .chart{margin:0;border:1px solid var(--sc-rule);border-radius:10px;padding:16px 18px 10px}
 .chart figcaption{display:flex;flex-direction:column;margin-bottom:12px}.chart figcaption b{font-size:15px}.chart figcaption span{font-size:12px;color:var(--sc-muted)}
 .plot{position:relative}
@@ -200,6 +211,7 @@ th{font-weight:600;color:var(--sc-muted);font-size:12px;white-space:nowrap;backg
 td.n{font-family:var(--sc-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}th.n{text-align:right}
 td.p a{color:var(--sc-ink);text-decoration:none;font-weight:600;white-space:nowrap}td.p a:hover{color:var(--sc-accent)}td.p span{display:block;font:11px var(--sc-font-mono);color:var(--sc-soft);font-weight:400}
 td.fit{color:var(--sc-muted);min-width:180px}
+details.tv{margin-top:14px}details.tv summary{cursor:pointer;font-size:13px;color:var(--sc-muted)}details.tv .tw{margin-top:10px}
 .matrix th:first-child,.matrix td:first-child{position:sticky;left:0;background:var(--sc-paper);z-index:1}
 .matrix th:first-child{background:color-mix(in srgb,var(--sc-ink) 4%,var(--sc-paper))}
 .pcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
@@ -208,15 +220,19 @@ td.fit{color:var(--sc-muted);min-width:180px}
 .pcc .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .pcc h4{margin:0 0 4px;font-size:12px;color:var(--sc-muted);font-weight:600}
 .pcc ul{margin:0;padding-left:16px;font-size:13px;line-height:1.6}
+.src{font-size:13px;line-height:1.9;padding-left:18px;margin:0}.src a{color:var(--sc-muted)}.src a:hover{color:var(--sc-accent)}
 @media (max-width:640px){.charts{grid-template-columns:1fr}.row{grid-template-columns:96px 1fr}.axis{margin-left:96px}.pcc .two{grid-template-columns:1fr}}`;
 
-const matrix = `<div class="tw"><table class="matrix"><thead><tr><th>模式</th><th class="n">调用</th><th class="n">耗时</th><th class="n">tokens</th>`
-  + DIMS.map(([, l]) => `<th>${esc(l)}</th>`).join('') + `<th>最适合</th></tr></thead><tbody>`
-  + patterns.map((p) => `<tr><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td>`
-    + `<td class="n">${esc(p.calls)}</td><td class="n">${p.secs}s</td><td class="n">${kTokens(p.tokens)} ${fmtX(p.x)}</td>`
-    + DIMS.map(([k, l]) => `<td>${dots(p.scores[k], l)}</td>`).join('')
-    + `<td class="fit">${esc(p.fit[0])}</td></tr>`).join('')
+const matrix = `<div class="tw"><table class="matrix"><thead><tr><th>模式</th><th>模型调用</th>`
+  + COLS.map(([, l]) => `<th>${esc(l)}</th>`).join('') + `</tr></thead><tbody>`
+  + patterns.map((p) => `<tr><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td><td>${esc(p.calls)}</td>`
+    + COLS.map(([k]) => `<td class="${k === 'rounds' ? 'n' : 'w'}">${esc(p[k])}</td>`).join('') + `</tr>`).join('')
   + `</tbody></table></div>`;
+
+const measuredTable = `<details class="tv"><summary>查看实测明细表</summary><div class="tw"><table><thead><tr><th>模式</th><th class="n">模型调用</th><th class="n">耗时</th><th class="n">tokens</th><th class="n">最终答案汉字</th><th>本次走的路径</th></tr></thead><tbody>`
+  + patterns.map((p) => `<tr><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td><td class="n">${esc(p.calls_run)}</td><td class="n">${p.secs}s</td>`
+    + `<td class="n">${p.tokens.toLocaleString('en-US')} ${fmtX(p.x)}</td><td class="n">${p.final_cjk.toLocaleString('en-US')}</td><td class="fit">${esc(p.run_note)}</td></tr>`).join('')
+  + `</tbody></table></div></details>`;
 
 const scen = `<div class="tw"><table><thead><tr><th>你的情况</th><th>推荐模式</th><th>为什么</th></tr></thead><tbody>`
   + scenarios.map((s) => { const p = byId[s.id]; return `<tr><td>${esc(s.need)}</td><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td><td class="fit">${esc(s.why)}</td></tr>`; }).join('')
@@ -235,15 +251,19 @@ addEventListener('scroll',hide,{passive:true});})();`;
 
 writeFileSync(join(docs, 'compare.html'), head(`纵向对比 · ${SITE_TITLE}`, COMPARE_CSS)
   + topBar('纵向对比', 'compare')
-  + `<p class="lead">把 10 种模式放在一起比：先看同一任务的实测成本，再看定性评估，最后按场景选。点模式名可以跳到它的图。</p>`
+  + `<p class="lead">把 10 种模式放在一起比：先看同一任务的实测成本，再看结构差异，最后按场景选。点模式名可以跳到它的图。</p>`
   + `<h2 id="cost">实测成本</h2><p class="sub">${esc(measured.date)}，${esc(measured.platform)}，同一任务各跑 ${measured.runs} 次。只跑一次，看量级，不看小数点。</p>`
-  + `<div class="charts">${barChart('secs', '耗时（秒）', '墙钟时间，越短越好')}${barChart('tokens', 'Token 消耗', '×N 是相对单 Agent 基线的倍数，越少越好')}</div>`
-  + `<h2 id="matrix">定性评估</h2><p class="sub">作者的定性判断，不是测量结果。1–5 个点，<b>点越多越好</b>（"省钱"点多 = 成本低，"易搭建"点多 = 实现简单）。表格可横向滚动。</p>`
+  + `<div class="charts">${barChart('secs', '耗时（秒）', '墙钟时间')}${barChart('tokens', 'Token 消耗', '×N 是相对单 Agent 的倍数')}${barChart('final_cjk', '最终答案长度（汉字）', '各模式写出来的东西多少不一样')}</div>`
+  + measuredTable
+  + `<div class="callout" id="speed"><h3>${esc(notes.speed.title)}</h3>${paras(notes.speed.body)}</div>`
+  + `<h2 id="matrix">结构对比</h2><p class="sub">${esc(structure._note)}串行轮数 = 关键路径上必须依次等待的模型调用次数；同样的输出长度下，它基本决定了耗时。表格可横向滚动。</p>`
   + matrix
   + `<h2 id="choose">按场景选</h2><p class="sub">每种情况下最先考虑的模式；实际可以组合，比如在 MA-04 的每个子任务里套一个 MA-05。</p>`
   + scen
   + `<h2 id="pros-cons">优劣速查</h2><p class="sub">每种模式的完整优劣、适用场景和代表工具，在它自己的页面里。</p>`
   + pcg
+  + `<h2 id="sources">来源</h2><p class="sub">优劣和速度结论引用的公开资料；代表工具的出处在各自的官方文档和仓库。</p><ul class="src">`
+  + notes.sources.map(([t, u]) => `<li><a href="${esc(u)}">${esc(t)}</a></li>`).join('') + `</ul>`
   + `<div id="tip" role="tooltip"><b></b><span></span></div>`
   + tail(TIP_JS));
 

@@ -498,15 +498,13 @@ path.it-floor{fill:var(--sc-ink);fill-opacity:.04;stroke:var(--sc-ink);stroke-op
 .sc-tools .how{display:block;font:12px var(--sc-font-mono);color:var(--sc-muted);margin-top:2px}
 .pn-foot{margin-top:28px}
 .sc-full .pn,.sc-full .pc,.sc-full .sc-tools{display:none}
-.dots{display:inline-flex;gap:3px;vertical-align:middle}.dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--sc-soft);box-sizing:border-box}.dots i.on{background:var(--sc-ink);border-color:var(--sc-ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
+.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}
 </style><!-- site:end -->
 </head>
 <body>
 <main class="sc-page">
 <!-- site:start --><nav class="pn pn-top" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-00-single.html" title="单 Agent 基线">‹ MA-00</a><span class="here">MA-01 / MA-09</span><a href="ma-02-router.html" title="路由分诊">MA-02 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
-
-
-
 
 
 <header class="sc-head">
@@ -521,10 +519,7 @@ path.it-floor{fill:var(--sc-ink);fill-opacity:.04;stroke:var(--sc-ink);stroke-op
 <div class="sc-grip" role="separator" aria-orientation="horizontal" aria-label="Resize canvas: drag, or use the arrow keys; double-click to reset" tabindex="0"></div>
 <figcaption class="sc-caption">模型调用 3 次 · 实测 72s / 10.2k tokens（×4.1），耗时逐棒累加 · 适合有明确工序的内容生产 · 风险：传话失真，一棒错棒棒错</figcaption>
 </figure>
-<!-- site:start --><section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g"><div class="c"><h3>＋ 优势</h3><ul><li>角色分工清晰，每一棒只做一件事</li><li>每个环节可以单独替换、单独调优</li><li>流程固定，结果可复现</li></ul><p class="when"><b>适合：</b>有明确工序的内容生产；需要固定 SOP 的流程</p></div><div class="c"><h3>－ 劣势</h3><ul><li>传话失真：每一棒只看到上一棒的产出</li><li>一棒错、棒棒错，没有回头修正的机会</li><li>耗时逐棒累加，并行度为零</li></ul><p class="when"><b>不适合：</b>开放式探索；前后环节需要来回协商的任务</p></div></div><div class="rt"><span>省钱 <span class="dots" role="img" aria-label="省钱 3/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></span><span>速度 <span class="dots" role="img" aria-label="速度 2/5"><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></span><span>质量把关 <span class="dots" role="img" aria-label="质量把关 2/5"><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></span><span>多视角 <span class="dots" role="img" aria-label="多视角 3/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></span><span>可审计 <span class="dots" role="img" aria-label="可审计 4/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></span><span>易搭建 <span class="dots" role="img" aria-label="易搭建 4/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></span><a href="compare.html#matrix">与其它模式对比 →</a></div></section><section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2><p class="note">2026-10 调研时的状态。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点。</p><ul><li><span class="k">框架</span><b>MetaGPT</b><span class="how">PM→架构师→工程师 SOP</span></li><li><span class="k">框架</span><b>ChatDev</b><span class="how">瀑布式阶段接力</span></li><li><span class="k">框架</span><b>CrewAI</b><span class="how">sequential 流程</span></li><li><span class="k">第三方</span><b>Archon</b><span class="how">YAML 写死步骤</span></li><li><span class="k">平台</span><b>Dify / Coze / n8n</b><span class="how">节点串联工作流</span></li></ul></section><nav class="pn pn-foot" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-00-single.html" title="单 Agent 基线">‹ MA-00</a><span class="here">MA-01 / MA-09</span><a href="ma-02-router.html" title="路由分诊">MA-02 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
-
-
-
+<!-- site:start --><section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g"><div class="c"><h3>＋ 优势</h3><ul><li>角色分工清晰，每一棒只做一件事</li><li>每个环节可以单独替换、单独调优</li><li>流程固定，出了问题容易定位是哪一棒</li></ul><p class="when"><b>适合：</b>有明确工序的内容生产；需要固定 SOP 的流程</p></div><div class="c"><h3>－ 劣势</h3><ul><li>传话失真：每一棒只看到上一棒的产出</li><li>一棒错、棒棒错，没有回头修正的机会</li><li>耗时逐棒累加，并行度为零</li></ul><p class="when"><b>不适合：</b>开放式探索；前后环节需要来回协商的任务</p></div></div><dl class="facts" aria-label="结构特征"><div><dt>模型调用</dt><dd>3</dd></div><div><dt>串行轮数</dt><dd>3</dd></div><div><dt>并行</dt><dd>无</dd></div><div><dt>成员之间</dt><dd>每一棒只看到上一棒的产出</dd></div><div><dt>质量检查</dt><dd>编辑审校（同一条链、同一模型）</dd></div><div><dt>返工</dt><dd>无</dd></div></dl><p class="rt"><a href="compare.html#matrix">和其它模式的结构对比 →</a></p></section><section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2><p class="note">2026-11-06 对照官方文档和仓库核实。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点；标"实验""预览"的是厂商尚未正式发布的功能。</p><ul><li><span class="k">框架</span><b>MetaGPT</b><span class="how">PM→架构师→工程师 SOP</span></li><li><span class="k">框架</span><b>ChatDev</b><span class="how">1.0 版：瀑布式阶段接力</span></li><li><span class="k">框架</span><b>CrewAI</b><span class="how">Process.sequential</span></li><li><span class="k">框架</span><b>MS Agent Framework</b><span class="how">Sequential 编排</span></li><li><span class="k">第三方</span><b>Archon</b><span class="how">YAML 写死步骤</span></li><li><span class="k">平台</span><b>Dify / Coze / n8n</b><span class="how">节点串联工作流</span></li></ul></section><nav class="pn pn-foot" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-00-single.html" title="单 Agent 基线">‹ MA-00</a><span class="here">MA-01 / MA-09</span><a href="ma-02-router.html" title="路由分诊">MA-02 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
 
 
 <p class="sc-status" role="status" aria-live="polite"></p>

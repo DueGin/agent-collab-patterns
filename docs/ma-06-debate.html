@@ -498,15 +498,13 @@ path.it-floor{fill:var(--sc-ink);fill-opacity:.04;stroke:var(--sc-ink);stroke-op
 .sc-tools .how{display:block;font:12px var(--sc-font-mono);color:var(--sc-muted);margin-top:2px}
 .pn-foot{margin-top:28px}
 .sc-full .pn,.sc-full .pc,.sc-full .sc-tools{display:none}
-.dots{display:inline-flex;gap:3px;vertical-align:middle}.dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--sc-soft);box-sizing:border-box}.dots i.on{background:var(--sc-ink);border-color:var(--sc-ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
+.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}
 </style><!-- site:end -->
 </head>
 <body>
 <main class="sc-page">
 <!-- site:start --><nav class="pn pn-top" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-05-critic-loop.html" title="生成-评审循环">‹ MA-05</a><span class="here">MA-06 / MA-09</span><a href="ma-07-voting.html" title="投票集成">MA-07 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
-
-
-
 
 
 <header class="sc-head">
@@ -521,10 +519,7 @@ path.it-floor{fill:var(--sc-ink);fill-opacity:.04;stroke:var(--sc-ink);stroke-op
 <div class="sc-grip" role="separator" aria-orientation="horizontal" aria-label="Resize canvas: drag, or use the arrow keys; double-click to reset" tabindex="0"></div>
 <figcaption class="sc-caption">模型调用 6 次 · 实测 54s / 11.3k tokens（×4.5）· 适合决策题、方案取舍 · 风险：容易为了对立而对立，成本高</figcaption>
 </figure>
-<!-- site:start --><section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g"><div class="c"><h3>＋ 优势</h3><ul><li>正反对抗，能逼出反例和隐含假设</li><li>裁判看到双方的完整论证再做取舍</li><li>模型异质时，收益更明显</li></ul><p class="when"><b>适合：</b>决策题、方案取舍；需要暴露风险和反例的评审</p></div><div class="c"><h3>－ 劣势</h3><ul><li>容易为了对立而对立</li><li>调用次数多，成本较高</li><li>结论质量高度依赖裁判</li></ul><p class="when"><b>不适合：</b>有唯一正确答案的事实题；执行类任务</p></div></div><div class="rt"><span>省钱 <span class="dots" role="img" aria-label="省钱 3/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></span><span>速度 <span class="dots" role="img" aria-label="速度 3/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></span><span>质量把关 <span class="dots" role="img" aria-label="质量把关 3/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></span><span>多视角 <span class="dots" role="img" aria-label="多视角 5/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span></span><span>可审计 <span class="dots" role="img" aria-label="可审计 4/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></span><span>易搭建 <span class="dots" role="img" aria-label="易搭建 3/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i></span></span><a href="compare.html#matrix">与其它模式对比 →</a></div></section><section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2><p class="note">2026-10 调研时的状态。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点。</p><ul><li><span class="k">框架</span><b>MS Agent Framework</b><span class="how">GroupChat 编排</span></li><li><span class="k">第三方</span><b>Maestro</b><span class="how">Group Chat + moderator</span></li><li><span class="k">框架</span><b>CAMEL</b><span class="how">角色扮演对话</span></li><li><span class="k">学术</span><b>Multi-Agent Debate</b><span class="how">Du et al. 2023</span></li></ul></section><nav class="pn pn-foot" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-05-critic-loop.html" title="生成-评审循环">‹ MA-05</a><span class="here">MA-06 / MA-09</span><a href="ma-07-voting.html" title="投票集成">MA-07 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
-
-
-
+<!-- site:start --><section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g"><div class="c"><h3>＋ 优势</h3><ul><li>正反对抗，能逼出反例和隐含假设</li><li>裁判看到双方的完整论证再做取舍</li><li>正反方用不同模型时，效果普遍更好</li></ul><p class="when"><b>适合：</b>决策题、方案取舍；需要暴露风险和反例的评审</p></div><div class="c"><h3>－ 劣势</h3><ul><li>多数基准上并不比单模型 CoT 或多次采样投票更好</li><li>容易为了对立而对立</li><li>调用次数多，结论质量高度依赖裁判</li></ul><p class="when"><b>不适合：</b>有唯一正确答案的事实题；执行类任务</p></div></div><dl class="facts" aria-label="结构特征"><div><dt>模型调用</dt><dd>6</dd></div><div><dt>串行轮数</dt><dd>4</dd></div><div><dt>并行</dt><dd>2 路（正方、反方）</dd></div><div><dt>成员之间</dt><dd>反驳时能看到双方立论</dd></div><div><dt>质量检查</dt><dd>跨厂商裁判</dd></div><div><dt>返工</dt><dd>无</dd></div></dl><p class="rt"><a href="compare.html#matrix">和其它模式的结构对比 →</a></p></section><section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2><p class="note">2026-11-06 对照官方文档和仓库核实。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点；标"实验""预览"的是厂商尚未正式发布的功能。</p><ul><li><span class="k">学术</span><b>MAD（Liang et al.）</b><span class="how">正反方 + 裁判（论文）</span></li><li><span class="k">学术</span><b>Multi-Agent Debate（Du et al.）</b><span class="how">多实例多轮互辩、趋共识</span></li><li><span class="k">框架</span><b>MS Agent Framework</b><span class="how">Group Chat 编排</span></li><li><span class="k">第三方</span><b>Maestro</b><span class="how">Group Chat + moderator</span></li></ul></section><nav class="pn pn-foot" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-05-critic-loop.html" title="生成-评审循环">‹ MA-05</a><span class="here">MA-06 / MA-09</span><a href="ma-07-voting.html" title="投票集成">MA-07 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
 
 
 <p class="sc-status" role="status" aria-live="polite"></p>

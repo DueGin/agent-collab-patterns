@@ -498,15 +498,13 @@ path.it-floor{fill:var(--sc-ink);fill-opacity:.04;stroke:var(--sc-ink);stroke-op
 .sc-tools .how{display:block;font:12px var(--sc-font-mono);color:var(--sc-muted);margin-top:2px}
 .pn-foot{margin-top:28px}
 .sc-full .pn,.sc-full .pc,.sc-full .sc-tools{display:none}
-.dots{display:inline-flex;gap:3px;vertical-align:middle}.dots i{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--sc-soft);box-sizing:border-box}.dots i.on{background:var(--sc-ink);border-color:var(--sc-ink)}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
+.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}
 </style><!-- site:end -->
 </head>
 <body>
 <main class="sc-page">
 <!-- site:start --><nav class="pn pn-top" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-04-orchestrator.html" title="委派式编排">‹ MA-04</a><span class="here">MA-05 / MA-09</span><a href="ma-06-debate.html" title="多 Agent 辩论">MA-06 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
-
-
-
 
 
 <header class="sc-head">
@@ -521,10 +519,7 @@ path.it-floor{fill:var(--sc-ink);fill-opacity:.04;stroke:var(--sc-ink);stroke-op
 <div class="sc-grip" role="separator" aria-orientation="horizontal" aria-label="Resize canvas: drag, or use the arrow keys; double-click to reset" tabindex="0"></div>
 <figcaption class="sc-caption">模型调用 2~5 次 · 实测 99s / 20.0k tokens（×8.0），两轮评审都没通过，到上限输出第 3 版 · 风险：评审标准偏松或偏严都会失效</figcaption>
 </figure>
-<!-- site:start --><section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g"><div class="c"><h3>＋ 优势</h3><ul><li>质量逐轮提升，有明确的验收标准</li><li>评审员可以换成另一家更强的模型（跨厂商评审）</li><li>结构简单，容易加到现有流程上</li></ul><p class="when"><b>适合：</b>对质量要求高的单件产出；有客观标准的任务（代码、测试、格式）</p></div><div class="c"><h3>－ 劣势</h3><ul><li>标准偏松等于没审，偏严会一直打回、烧钱</li><li>轮数越多越慢、越贵（实测 ×8.0）</li><li>评审员和写手同源时，盲点也相同</li></ul><p class="when"><b>不适合：</b>没法给出评审标准的任务；对延迟敏感的场景</p></div></div><div class="rt"><span>省钱 <span class="dots" role="img" aria-label="省钱 2/5"><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></span><span>速度 <span class="dots" role="img" aria-label="速度 2/5"><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></span><span>质量把关 <span class="dots" role="img" aria-label="质量把关 4/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></span><span>多视角 <span class="dots" role="img" aria-label="多视角 2/5"><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i></span></span><span>可审计 <span class="dots" role="img" aria-label="可审计 4/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></span><span>易搭建 <span class="dots" role="img" aria-label="易搭建 4/5"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i></span></span><a href="compare.html#matrix">与其它模式对比 →</a></div></section><section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2><p class="note">2026-10 调研时的状态。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点。</p><ul><li><span class="k">插件</span><b>Claude Code + Codex</b><span class="how">codex-plugin-cc 评审闸门</span></li><li><span class="k">厂商</span><b>Claude Code</b><span class="how">Stop hook 退出码 2 打回</span></li><li><span class="k">第三方</span><b>Orchestrator.inc</b><span class="how">PR 评审 / CI 意见推回</span></li><li><span class="k">框架</span><b>Google ADK</b><span class="how">LoopAgent</span></li></ul></section><nav class="pn pn-foot" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-04-orchestrator.html" title="委派式编排">‹ MA-04</a><span class="here">MA-05 / MA-09</span><a href="ma-06-debate.html" title="多 Agent 辩论">MA-06 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
-
-
-
+<!-- site:start --><section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g"><div class="c"><h3>＋ 优势</h3><ul><li>质量逐轮提升，有明确的验收标准</li><li>评审员更强、上下文干净时提升明显（Codex 写、Claude 审：71.6% → 89.7%）</li><li>结构简单，容易加到现有流程上</li></ul><p class="when"><b>适合：</b>对质量要求高的单件产出；有客观标准的任务（代码、测试、格式）</p></div><div class="c"><h3>－ 劣势</h3><ul><li>标准偏松等于没审，偏严会一直打回、烧钱</li><li>每多一轮就多一段串行等待（实测 99s，×8.0）</li><li>评审员比写手弱时会帮倒忙（Claude 写、Codex 审：91.4% → 82.8%）</li><li>评审员和写手同一家时，错误往往相关，盲点也相同</li></ul><p class="when"><b>不适合：</b>没法给出评审标准的任务；对延迟敏感的场景</p></div></div><dl class="facts" aria-label="结构特征"><div><dt>模型调用</dt><dd>2~5（本次 5）</dd></div><div><dt>串行轮数</dt><dd>2~5</dd></div><div><dt>并行</dt><dd>无</dd></div><div><dt>成员之间</dt><dd>写手能看到评审意见</dd></div><div><dt>质量检查</dt><dd>跨厂商评审员按 4 项打分，不达标就打回</dd></div><div><dt>返工</dt><dd>最多 2 轮</dd></div></dl><p class="rt"><a href="compare.html#matrix">和其它模式的结构对比 →</a></p></section><section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2><p class="note">2026-11-06 对照官方文档和仓库核实。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点；标"实验""预览"的是厂商尚未正式发布的功能。</p><ul><li><span class="k">插件</span><b>Claude Code + Codex</b><span class="how">codex-plugin-cc 可选评审闸门</span></li><li><span class="k">厂商</span><b>Claude Code</b><span class="how">Stop hook 退出码 2 打回</span></li><li><span class="k">第三方</span><b>Orchestrator.inc</b><span class="how">CI / 评审意见推回 worker</span></li><li><span class="k">框架</span><b>Google ADK</b><span class="how">LoopAgent</span></li><li><span class="k">框架</span><b>OpenAI Agents SDK</b><span class="how">llm_as_a_judge 示例</span></li></ul></section><nav class="pn pn-foot" aria-label="模式导航"><a href="./">← 全部模式</a><a href="ma-04-orchestrator.html" title="委派式编排">‹ MA-04</a><span class="here">MA-05 / MA-09</span><a href="ma-06-debate.html" title="多 Agent 辩论">MA-06 ›</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav><!-- site:end -->
 
 
 <p class="sc-status" role="status" aria-live="polite"></p>
