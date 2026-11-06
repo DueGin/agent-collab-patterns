@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 // Build the site around the SeeCode diagrams, from data/patterns.json:
-//   - each docs/ma-*.html gets a top nav (all / prev / next / compare), a pros & cons
-//     section and the tools list, injected after the diagram (idempotent, marker-delimited);
-//   - docs/index.html is rewritten as a card grid with static thumbnails (no iframes);
-//   - docs/compare.html is the side-by-side comparison of all patterns.
+//   - each flow diagram page (docs/<slug>.html) gets a top/bottom nav, its architecture
+//     diagram (if any), pros & cons with structural facts, and the tools list;
+//   - each architecture page (docs/<slug>-arch.html) gets a nav back to its pattern;
+//   - docs/index.html: card grid with static thumbnails;
+//   - docs/compare.html: all patterns compared on the same dimensions.
+// Injected blocks are marker-delimited, so reruns are idempotent.
 //
 // Usage: node scripts/site.mjs [docsDir]
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
@@ -13,19 +15,19 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const docs = process.argv[2] || join(root, 'docs');
 const data = JSON.parse(readFileSync(join(root, 'data', 'patterns.json'), 'utf8'));
-const { patterns, scenarios, measured, structure, notes } = data;
+const { patterns, scenarios, structure, notes } = data;
 const { skinCss, FONTS_HREF } = await import(pathToFileURL(join(root, '.seecode/skills/seecode/scripts/lib/tokens.mjs')).href);
 
 const REPO = 'https://github.com/DueGin/agent-collab-patterns';
 const SITE_TITLE = '多 Agent 协作模式图解';
-const COLS = structure.cols; // [[key, label], ...] structural attributes
+const COLS = structure.cols; // [[key, label], ...]
 const byId = Object.fromEntries(patterns.map((p) => [p.id, p]));
+const nArch = patterns.filter((p) => p.arch).length;
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
-const kTokens = (n) => `${(n / 1000).toFixed(1)}K`;
-const fmtX = (x) => `×${x.toFixed(1)}`;
 const strip = (h) => h.replace(/<!-- (tools|site):start -->[\s\S]*?<!-- (tools|site):end -->\n?/g, '');
 const block = (html) => `<!-- site:start -->${html}<!-- site:end -->\n`;
+const li = (xs) => xs.map((x) => `<li>${esc(x)}</li>`).join('');
 
 // Same theme contract as the SeeCode pages: <html data-theme>, localStorage "seecode:theme".
 const THEME_BOOT = `<script>(function(){try{var t=localStorage.getItem('seecode:theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>`;
@@ -34,38 +36,94 @@ function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':m.matches
 b.addEventListener('click',function(){var t=dark()?'light':'dark';r.setAttribute('data-theme',t);try{localStorage.setItem('seecode:theme',t);}catch(e){}sync();});
 m.addEventListener&&m.addEventListener('change',sync);sync();})();`;
 
-const callsText = (p) => p.calls + (p.calls_run !== p.calls ? `（本次 ${p.calls_run}）` : '');
-const paras = (xs) => xs.map((x) => `<p>${x}</p>`).join(''); // notes are trusted HTML from our own data file
+// Light/dark thumbnail pair; CSS shows the one matching the theme.
+const THEMED_IMG_CSS = `.th-dark{display:none}
+[data-theme="dark"] .th-dark{display:block}[data-theme="dark"] .th-light{display:none}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .th-dark{display:block}:root:not([data-theme="light"]) .th-light{display:none}}`;
+const themedImg = (slug, alt) => `<img class="th-light" src="thumbs/${slug}-light.png" alt="${esc(alt)}" loading="lazy"><img class="th-dark" src="thumbs/${slug}-dark.png" alt="" loading="lazy">`;
 
-// ---------- shared CSS ----------
-const FACTS_CSS = `.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
-.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}`;
-
-const PAGE_CSS = `
+// ---------- CSS injected into SeeCode pages ----------
+const NAV_CSS = `
 .pn{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:0 0 20px;font-size:13px}
 .pn a{color:var(--sc-muted);text-decoration:none;border:1px solid var(--sc-rule);border-radius:6px;padding:4px 10px}
 .pn a:hover,.pn a:focus-visible{color:var(--sc-ink);border-color:var(--sc-accent);outline:none}
 .pn .sp{flex:1}.pn .here{font:12px var(--sc-font-mono);color:var(--sc-soft)}
-.pc{margin:32px 0 8px;padding-top:20px;border-top:1px solid var(--sc-rule)}
-.pc h2,.sc-tools h2{font-family:var(--sc-font-serif);font-weight:400;font-size:22px;margin:0 0 12px;color:var(--sc-ink)}
+.pn-foot{margin-top:28px}
+.sc-full .pn{display:none}`;
+
+const PAGE_CSS = `${NAV_CSS}
+.sec{margin:32px 0 8px;padding-top:20px;border-top:1px solid var(--sc-rule)}
+.sec h2{font-family:var(--sc-font-serif);font-weight:400;font-size:22px;margin:0 0 6px;color:var(--sc-ink)}
+.sec .note{color:var(--sc-muted);font-size:13px;margin:0 0 14px}
+.arch a.fig{display:block;border:1px solid var(--sc-rule);border-radius:10px;padding:16px;text-align:center}
+.arch a.fig:hover,.arch a.fig:focus-visible{border-color:var(--sc-accent);outline:none}
+.arch a.fig img{max-width:100%;max-height:720px;height:auto;margin:0 auto}
+.arch .open{display:inline-block;margin-top:10px;font-size:13px;color:var(--sc-accent)}
 .pc .g{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
 .pc .c{border:1px solid var(--sc-rule);border-radius:8px;padding:14px 16px}
 .pc h3{font-size:14px;font-weight:600;margin:0 0 8px;color:var(--sc-ink)}
 .pc ul{margin:0;padding-left:18px;color:var(--sc-ink);font-size:14px;line-height:1.7}
 .pc .when{margin:10px 0 0;font-size:13px;color:var(--sc-muted);line-height:1.6}.pc .when b{color:var(--sc-ink);font-weight:600}
-.pc .rt{display:flex;flex-wrap:wrap;gap:6px 18px;margin:14px 0 0;font-size:13px;color:var(--sc-muted);align-items:center}
-.pc .rt a{color:var(--sc-accent)}
-.sc-tools{margin:28px 0 8px;padding-top:20px;border-top:1px solid var(--sc-rule)}
-.sc-tools .note{color:var(--sc-muted);font-size:13px;margin:-6px 0 14px}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
+.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}
+.pc .rt{margin:10px 0 0;font-size:13px}.pc .rt a{color:var(--sc-accent)}
 .sc-tools ul{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .sc-tools li{border:1px solid var(--sc-rule);border-radius:8px;padding:10px 12px}
 .sc-tools .k{display:inline-block;font:11px var(--sc-font-mono);color:var(--sc-soft);border:1px solid var(--sc-rule);border-radius:4px;padding:0 5px;margin-bottom:6px}
 .sc-tools b{display:block;font-size:14px;font-weight:600;color:var(--sc-ink)}
 .sc-tools .how{display:block;font:12px var(--sc-font-mono);color:var(--sc-muted);margin-top:2px}
-.pn-foot{margin-top:28px}
-.sc-full .pn,.sc-full .pc,.sc-full .sc-tools{display:none}
-${FACTS_CSS}`;
+.sc-full .sec{display:none}
+${THEMED_IMG_CSS}`;
 
+// ---------- 1. pattern pages and their architecture pages ----------
+let pages = 0;
+patterns.forEach((p, i) => {
+  const file = join(docs, `${p.slug}.html`);
+  if (!existsSync(file)) { console.error(`skip ${p.slug}: no ${file}`); return; }
+  const prev = patterns[i - 1], next = patterns[i + 1];
+  const nav = (cls) => `<nav class="pn ${cls}" aria-label="模式导航"><a href="./">← 全部模式</a>`
+    + (prev ? `<a href="${prev.slug}.html" title="${esc(prev.name)}">‹ ${esc(prev.id)}</a>` : '')
+    + `<span class="here">${esc(p.id)} / ${esc(patterns[patterns.length - 1].id)}</span>`
+    + (next ? `<a href="${next.slug}.html" title="${esc(next.name)}">${esc(next.id)} ›</a>` : '')
+    + `<span class="sp"></span>${p.arch ? `<a href="#arch-h">系统架构 ↓</a>` : ''}<a href="compare.html">纵向对比 →</a></nav>`;
+
+  const arch = p.arch ? `<section class="sec arch" aria-labelledby="arch-h"><h2 id="arch-h">系统架构</h2>`
+    + `<p class="note">上面的图是协作流程：谁把什么交给谁。这张图是把它真正跑起来需要的组件：共享状态、通信通道、隔离和闸门。</p>`
+    + `<a class="fig" href="${p.arch}.html">${themedImg(p.arch, p.name + ' 系统架构图')}<span class="open">打开可交互的架构图 →</span></a></section>` : '';
+
+  const facts = `<dl class="facts" aria-label="结构特征">${COLS.map(([k, l]) => `<div><dt>${esc(l)}</dt><dd>${esc(p[k])}</dd></div>`).join('')}</dl>`;
+  const pc = `<section class="sec pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g">`
+    + `<div class="c"><h3>＋ 优势</h3><ul>${li(p.pros)}</ul><p class="when"><b>适合：</b>${p.fit.map(esc).join('；')}</p></div>`
+    + `<div class="c"><h3>－ 劣势</h3><ul>${li(p.cons)}</ul><p class="when"><b>不适合：</b>${p.unfit.map(esc).join('；')}</p></div></div>`
+    + facts + `<p class="rt"><a href="compare.html#matrix">和其它模式对比 →</a></p></section>`;
+
+  const tools = `<section class="sec sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2>`
+    + `<p class="note">2026-11-06 对照官方文档和仓库核实。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点；标"实验""预览"的是厂商尚未正式发布的功能。</p><ul>`
+    + p.tools.map((t) => `<li><span class="k">${esc(t.kind)}</span><b>${esc(t.name)}</b><span class="how">${esc(t.how)}</span></li>`).join('')
+    + `</ul></section>`;
+
+  let h = strip(readFileSync(file, 'utf8'));
+  h = h.replace('</head>', block(`<style id="site-css">${PAGE_CSS}\n</style>`) + '</head>')
+    .replace('<main class="sc-page">', '<main class="sc-page">\n' + block(nav('pn-top')))
+    .replace('</figure>', '</figure>\n' + block(arch + pc + tools + nav('pn-foot')));
+  writeFileSync(file, h);
+  pages++;
+
+  if (p.arch) {
+    const af = join(docs, `${p.arch}.html`);
+    if (!existsSync(af)) { console.error(`skip ${p.arch}: no ${af}`); return; }
+    const anav = (cls) => `<nav class="pn ${cls}" aria-label="架构图导航"><a href="${p.slug}.html">← ${esc(p.id)} ${esc(p.name)}</a>`
+      + `<a href="./">全部模式</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav>`;
+    let a = strip(readFileSync(af, 'utf8'));
+    a = a.replace('</head>', block(`<style id="site-css">${NAV_CSS}\n</style>`) + '</head>')
+      .replace('<main class="sc-page">', '<main class="sc-page">\n' + block(anav('pn-top')))
+      .replace('</figure>', '</figure>\n' + block(anav('pn-foot')));
+    writeFileSync(af, a);
+    pages++;
+  }
+});
+
+// ---------- shared shell for index and compare ----------
 const SITE_CSS = `
 *{box-sizing:border-box}body{margin:0;background:var(--sc-paper);color:var(--sc-ink);font-family:var(--sc-font-sans);line-height:1.5}
 main{max-width:1240px;margin:0 auto;padding:44px 24px 64px}
@@ -80,11 +138,8 @@ p.lead{color:var(--sc-muted);margin:10px 0 28px;max-width:860px}
 h2{font-family:var(--sc-font-serif);font-weight:400;font-size:24px;margin:44px 0 6px}
 p.sub{color:var(--sc-muted);font-size:13px;margin:0 0 16px}
 footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);color:var(--sc-soft);font-size:12px}
-.th-dark{display:none}
-[data-theme="dark"] .th-dark{display:block}[data-theme="dark"] .th-light{display:none}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .th-dark{display:block}:root:not([data-theme="light"]) .th-light{display:none}}
-@media (max-width:640px){main{padding:28px 16px 48px}.top h1{font-size:28px}}
-${FACTS_CSS}`;
+${THEMED_IMG_CSS}
+@media (max-width:640px){main{padding:28px 16px 48px}.top h1{font-size:28px}}`;
 
 const head = (title, extraCss) => `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>${esc(title)}</title>${THEME_BOOT}
@@ -96,40 +151,8 @@ const topBar = (title, current) => `<header class="top"><h1>${esc(title)}</h1><n
 <a href="compare.html"${current === 'compare' ? ' class="cur" aria-current="page"' : ''}>纵向对比</a>
 <a href="${REPO}">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header>`;
 
-const footer = `<footer>实测：${esc(measured.date)} 在 ${esc(measured.platform)} 上同一任务各跑 ${measured.runs} 次（执行 ${esc(measured.executor)}，评审 ${esc(measured.reviewer)}），看量级即可。
-优劣是按实现结构和公开研究归纳的，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer>`;
-
+const footer = `<footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer>`;
 const tail = (js = '') => `${footer}</main><script>${THEME_TOGGLE_JS}${js}</script></body></html>\n`;
-
-// ---------- 1. pattern pages ----------
-let pages = 0;
-patterns.forEach((p, i) => {
-  const file = join(docs, `${p.slug}.html`);
-  if (!existsSync(file)) { console.error(`skip ${p.slug}: no ${file}`); return; }
-  const prev = patterns[i - 1], next = patterns[i + 1];
-  const nav = (cls) => `<nav class="pn ${cls}" aria-label="模式导航"><a href="./">← 全部模式</a>`
-    + (prev ? `<a href="${prev.slug}.html" title="${esc(prev.name)}">‹ ${esc(prev.id)}</a>` : '')
-    + `<span class="here">${esc(p.id)} / ${esc(patterns[patterns.length - 1].id)}</span>`
-    + (next ? `<a href="${next.slug}.html" title="${esc(next.name)}">${esc(next.id)} ›</a>` : '')
-    + `<span class="sp"></span><a href="compare.html">纵向对比 →</a></nav>`;
-  const li = (xs) => xs.map((x) => `<li>${esc(x)}</li>`).join('');
-  const facts = [['模型调用', callsText(p)], ...COLS.map(([k, l]) => [l, p[k]])];
-  const rt = `<dl class="facts" aria-label="结构特征">${facts.map(([l, v]) => `<div><dt>${esc(l)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
-  const pc = `<section class="pc" aria-labelledby="pc-h"><h2 id="pc-h">优势与劣势</h2><div class="g">`
-    + `<div class="c"><h3>＋ 优势</h3><ul>${li(p.pros)}</ul><p class="when"><b>适合：</b>${p.fit.map(esc).join('；')}</p></div>`
-    + `<div class="c"><h3>－ 劣势</h3><ul>${li(p.cons)}</ul><p class="when"><b>不适合：</b>${p.unfit.map(esc).join('；')}</p></div></div>`
-    + rt + `<p class="rt"><a href="compare.html#matrix">和其它模式的结构对比 →</a></p></section>`;
-  const tools = `<section class="sc-tools" aria-labelledby="tl-h"><h2 id="tl-h">市面上遵循此模式的工具</h2>`
-    + `<p class="note">2026-11-06 对照官方文档和仓库核实。多数只是"部分对应"：核心机制属于这种模式，不代表实现了图上的每个节点；标"实验""预览"的是厂商尚未正式发布的功能。</p><ul>`
-    + p.tools.map((t) => `<li><span class="k">${esc(t.kind)}</span><b>${esc(t.name)}</b><span class="how">${esc(t.how)}</span></li>`).join('')
-    + `</ul></section>`;
-  let h = strip(readFileSync(file, 'utf8'));
-  h = h.replace('</head>', block(`<style id="site-css">${PAGE_CSS}\n</style>`) + '</head>')
-    .replace('<main class="sc-page">', '<main class="sc-page">\n' + block(nav('pn-top')))
-    .replace('</figure>', '</figure>\n' + block(pc + tools + nav('pn-foot')));
-  writeFileSync(file, h);
-  pages++;
-});
 
 // ---------- 2. index ----------
 const INDEX_CSS = `
@@ -139,79 +162,39 @@ const INDEX_CSS = `
 .thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;padding:12px;border-bottom:1px solid var(--sc-rule);overflow:hidden}
 .thumb img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
-.id{font:12px var(--sc-font-mono);color:var(--sc-soft)}
+.idl{display:flex;align-items:center;gap:8px}.id{font:12px var(--sc-font-mono);color:var(--sc-soft)}
+.badge{font-size:11px;color:var(--sc-accent);border:1px solid var(--sc-accent);border-radius:4px;padding:0 5px}
 .body h3{margin:0;font-size:17px;font-weight:600}
 .topo{margin:0;font-size:13px;color:var(--sc-muted)}
-.st{display:flex;gap:14px;font:12px var(--sc-font-mono);color:var(--sc-muted);margin:2px 0}
+.st{display:flex;flex-wrap:wrap;gap:4px 14px;font:12px var(--sc-font-mono);color:var(--sc-muted);margin:2px 0}
 .pm{margin:0;font-size:13px;line-height:1.6}.pm b{font-weight:600}
 .tl{margin:auto 0 0;padding-top:8px;font-size:12px;color:var(--sc-soft);line-height:1.6}`;
 
 const card = (p) => `<li><a class="card" href="${p.slug}.html">
-<div class="thumb"><img class="th-light" src="thumbs/${p.slug}-light.png" alt="${esc(p.name)} 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/${p.slug}-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">${esc(p.id)}</span><h3>${esc(p.name)}</h3><p class="topo">${esc(p.topo)}</p>
-<div class="st"><span>调用 ${esc(p.calls)}</span><span>串行 ${esc(p.rounds)} 轮</span><span>${p.secs}s</span><span>${kTokens(p.tokens)} tokens ${fmtX(p.x)}</span></div>
+<div class="thumb">${themedImg(p.slug, p.name + ' 协作流程图')}</div>
+<div class="body"><div class="idl"><span class="id">${esc(p.id)}</span>${p.arch ? '<span class="badge">含架构图</span>' : ''}</div><h3>${esc(p.name)}</h3><p class="topo">${esc(p.topo)}</p>
+<div class="st"><span>调用 ${esc(p.calls)}</span><span>串行 ${esc(p.rounds)} 轮</span><span>并行 ${esc(p.parallel)}</span></div>
 <p class="pm"><b>＋</b> ${esc(p.pros[0])}</p><p class="pm"><b>－</b> ${esc(p.cons[0])}</p>
 <p class="tl">${p.tools.map((t) => esc(t.name)).join(' · ')}</p></div></a></li>`;
 
 writeFileSync(join(docs, 'index.html'), head(SITE_TITLE, INDEX_CSS)
   + topBar(SITE_TITLE, 'index')
-  + `<p class="lead">10 种常见的多 Agent 协作模式，每种一张可交互的动画图（悬停追踪、点击聚焦、◀ ▶ 单步）。每张图下方列出优劣和市面上遵循该模式的工具；`
-  + `想比较实测成本和结构差异，看 <a href="compare.html">纵向对比</a>。</p>`
+  + `<p class="lead">10 种常见的多 Agent 协作模式。每种一张可交互的协作流程图（悬停追踪、点击聚焦、◀ ▶ 单步）；其中 ${nArch} 种需要额外基础设施的，另附系统架构图。`
+  + `每张图下方列出优劣和市面上遵循该模式的工具；各模式之间的横向比较见 <a href="compare.html">纵向对比</a>。</p>`
   + `<ol class="grid">${patterns.map(card).join('')}</ol>` + tail());
 
 // ---------- 3. compare ----------
-const AXES = {
-  secs: { max: 240, ticks: [0, 60, 120, 180, 240], fmt: (v) => `${v}s`, label: (v) => `${v}s`, tip: (v) => `${v} 秒` },
-  tokens: { max: 80000, ticks: [0, 20000, 40000, 60000, 80000], fmt: (v) => (v ? `${v / 1000}K` : '0'), label: (v, p) => `${kTokens(v)} ${fmtX(p.x)}`, tip: (v, p) => `${v.toLocaleString('en-US')} tokens（${fmtX(p.x)}）` },
-  final_cjk: { max: 4000, ticks: [0, 1000, 2000, 3000, 4000], fmt: (v) => (v ? `${v / 1000}K` : '0'), label: (v) => `${v.toLocaleString('en-US')} 字`, tip: (v) => `最终答案约 ${v.toLocaleString('en-US')} 个汉字` },
-};
-const barChart = (key, title, sub) => {
-  const ax = AXES[key];
-  const rows = patterns.map((p) => {
-    const v = p[key], w = (v / ax.max) * 100;
-    const label = ax.label(v, p);
-    const tip = ax.tip(v, p);
-    return `<div class="row"><a class="nm" href="${p.slug}.html"><span>${esc(p.id)}</span>${esc(p.short)}</a>`
-      + `<div class="track"><span class="bar" tabindex="0" style="width:${w.toFixed(2)}%" data-v="${esc(tip)}" data-n="${esc(p.id + ' ' + p.name)}" aria-label="${esc(p.id + ' ' + p.name + '：' + tip)}"></span><span class="val">${esc(label)}</span></div></div>`;
-  }).join('');
-  const ticks = ax.ticks.map((t) => `<span style="left:${(t / ax.max) * 100}%">${ax.fmt(t)}</span>`).join('');
-  return `<figure class="chart"><figcaption><b>${esc(title)}</b><span>${esc(sub)}</span></figcaption><div class="plot">${rows}<div class="axis"><div class="ticks">${ticks}</div></div></div></figure>`;
-};
-
 const COMPARE_CSS = `
-.charts{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:20px}
-.callout{margin:20px 0 0;padding:14px 18px;border:1px solid var(--sc-rule);border-left:3px solid var(--sc-accent);border-radius:8px;font-size:14px;line-height:1.75}
-.callout h3{margin:0 0 6px;font-size:15px}.callout p{margin:6px 0}
-.callout ul{margin:6px 0;padding-left:20px}
-td.w{min-width:200px;color:var(--sc-ink)}
-.chart{margin:0;border:1px solid var(--sc-rule);border-radius:10px;padding:16px 18px 10px}
-.chart figcaption{display:flex;flex-direction:column;margin-bottom:12px}.chart figcaption b{font-size:15px}.chart figcaption span{font-size:12px;color:var(--sc-muted)}
-.plot{position:relative}
-.row{display:grid;grid-template-columns:132px 1fr;align-items:center;height:30px}
-.nm{font-size:13px;color:var(--sc-ink);text-decoration:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nm span{font:11px var(--sc-font-mono);color:var(--sc-soft);margin-right:6px}
-.nm:hover{color:var(--sc-accent)}
-.track{position:relative;height:100%;display:flex;align-items:center;border-left:1px solid var(--sc-soft);
-  background-image:linear-gradient(to right,var(--sc-rule) 1px,transparent 1px);background-size:25% 100%;background-position:-1px 0}
-.bar{display:block;height:18px;min-width:2px;background:var(--bar);border-radius:0 4px 4px 0;cursor:default;outline:none}
-.bar:hover,.bar:focus-visible{background:var(--bar-hi)}
-.bar:focus-visible{box-shadow:0 0 0 2px var(--sc-paper),0 0 0 4px var(--sc-ink)}
-.val{margin-left:6px;font:12px var(--sc-font-mono);color:var(--sc-ink);font-variant-numeric:tabular-nums;white-space:nowrap}
-.axis{margin-left:132px;position:relative;height:22px}.ticks span{position:absolute;top:4px;transform:translateX(-50%);font:11px var(--sc-font-mono);color:var(--sc-soft);font-variant-numeric:tabular-nums}
-.ticks span:first-child{transform:none}.ticks span:last-child{transform:translateX(-100%)}
-:root{--bar:#2f54eb;--bar-hi:#4a6bf0}
-[data-theme="dark"]{--bar:#7b93ff;--bar-hi:#98abff}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bar:#7b93ff;--bar-hi:#98abff}}
-#tip{position:fixed;z-index:10;pointer-events:none;background:var(--sc-paper);border:1px solid var(--sc-rule);border-radius:6px;padding:6px 10px;box-shadow:0 4px 14px rgba(0,0,0,.12);font-size:12px;display:none}
-#tip b{display:block;font:600 14px var(--sc-font-mono);color:var(--sc-ink)}#tip span{display:flex;align-items:center;gap:6px;color:var(--sc-muted)}#tip span::before{content:"";width:12px;height:2px;background:var(--bar)}
 .tw{overflow-x:auto;border:1px solid var(--sc-rule);border-radius:10px}
 table{border-collapse:collapse;width:100%;font-size:13px}
-th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--sc-rule);vertical-align:middle}
+th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--sc-rule);vertical-align:top}
 tr:last-child td{border-bottom:none}
 th{font-weight:600;color:var(--sc-muted);font-size:12px;white-space:nowrap;background:color-mix(in srgb,var(--sc-ink) 4%,var(--sc-paper))}
-td.n{font-family:var(--sc-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}th.n{text-align:right}
-td.p a{color:var(--sc-ink);text-decoration:none;font-weight:600;white-space:nowrap}td.p a:hover{color:var(--sc-accent)}td.p span{display:block;font:11px var(--sc-font-mono);color:var(--sc-soft);font-weight:400}
-td.fit{color:var(--sc-muted);min-width:180px}
-details.tv{margin-top:14px}details.tv summary{cursor:pointer;font-size:13px;color:var(--sc-muted)}details.tv .tw{margin-top:10px}
+td.n{font-family:var(--sc-font-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.p a{color:var(--sc-ink);text-decoration:none;font-weight:600;white-space:nowrap}td.p a:hover{color:var(--sc-accent)}
+td.p span{display:block;font:11px var(--sc-font-mono);color:var(--sc-soft);font-weight:400}
+td.p a.ar{display:inline-block;margin-top:4px;font-size:11px;font-weight:400;color:var(--sc-accent)}
+td.w{min-width:160px}td.fit{color:var(--sc-muted);min-width:180px}
 .matrix th:first-child,.matrix td:first-child{position:sticky;left:0;background:var(--sc-paper);z-index:1}
 .matrix th:first-child{background:color-mix(in srgb,var(--sc-ink) 4%,var(--sc-paper))}
 .pcg{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
@@ -221,50 +204,33 @@ details.tv{margin-top:14px}details.tv summary{cursor:pointer;font-size:13px;colo
 .pcc h4{margin:0 0 4px;font-size:12px;color:var(--sc-muted);font-weight:600}
 .pcc ul{margin:0;padding-left:16px;font-size:13px;line-height:1.6}
 .src{font-size:13px;line-height:1.9;padding-left:18px;margin:0}.src a{color:var(--sc-muted)}.src a:hover{color:var(--sc-accent)}
-@media (max-width:640px){.charts{grid-template-columns:1fr}.row{grid-template-columns:96px 1fr}.axis{margin-left:96px}.pcc .two{grid-template-columns:1fr}}`;
+@media (max-width:640px){.pcc .two{grid-template-columns:1fr}}`;
 
-const matrix = `<div class="tw"><table class="matrix"><thead><tr><th>模式</th><th>模型调用</th>`
-  + COLS.map(([, l]) => `<th>${esc(l)}</th>`).join('') + `</tr></thead><tbody>`
-  + patterns.map((p) => `<tr><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td><td>${esc(p.calls)}</td>`
-    + COLS.map(([k]) => `<td class="${k === 'rounds' ? 'n' : 'w'}">${esc(p[k])}</td>`).join('') + `</tr>`).join('')
+const patCell = (p) => `<td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span>${p.arch ? `<a class="ar" href="${p.arch}.html">架构图 →</a>` : ''}</td>`;
+
+const matrix = `<div class="tw"><table class="matrix"><thead><tr><th>模式</th>${COLS.map(([, l]) => `<th>${esc(l)}</th>`).join('')}</tr></thead><tbody>`
+  + patterns.map((p) => `<tr>${patCell(p)}`
+    + COLS.map(([k]) => `<td class="${k === 'calls' || k === 'rounds' ? 'n' : 'w'}">${esc(p[k])}</td>`).join('') + `</tr>`).join('')
   + `</tbody></table></div>`;
 
-const measuredTable = `<details class="tv"><summary>查看实测明细表</summary><div class="tw"><table><thead><tr><th>模式</th><th class="n">模型调用</th><th class="n">耗时</th><th class="n">tokens</th><th class="n">最终答案汉字</th><th>本次走的路径</th></tr></thead><tbody>`
-  + patterns.map((p) => `<tr><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td><td class="n">${esc(p.calls_run)}</td><td class="n">${p.secs}s</td>`
-    + `<td class="n">${p.tokens.toLocaleString('en-US')} ${fmtX(p.x)}</td><td class="n">${p.final_cjk.toLocaleString('en-US')}</td><td class="fit">${esc(p.run_note)}</td></tr>`).join('')
-  + `</tbody></table></div></details>`;
-
 const scen = `<div class="tw"><table><thead><tr><th>你的情况</th><th>推荐模式</th><th>为什么</th></tr></thead><tbody>`
-  + scenarios.map((s) => { const p = byId[s.id]; return `<tr><td>${esc(s.need)}</td><td class="p"><a href="${p.slug}.html">${esc(p.name)}</a><span>${esc(p.id)}</span></td><td class="fit">${esc(s.why)}</td></tr>`; }).join('')
+  + scenarios.map((s) => { const p = byId[s.id]; return `<tr><td>${esc(s.need)}</td>${patCell(p)}<td class="fit">${esc(s.why)}</td></tr>`; }).join('')
   + `</tbody></table></div>`;
 
 const pcg = `<div class="pcg">` + patterns.map((p) => `<div class="pcc"><h3><a href="${p.slug}.html"><span>${esc(p.id)}</span>${esc(p.name)}</a></h3><div class="two">`
-  + `<div><h4>＋ 优势</h4><ul>${p.pros.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div>`
-  + `<div><h4>－ 劣势</h4><ul>${p.cons.map((x) => `<li>${esc(x)}</li>`).join('')}</ul></div></div></div>`).join('') + `</div>`;
-
-const TIP_JS = `(function(){var tip=document.getElementById('tip'),v=tip.querySelector('b'),n=tip.querySelector('span');
-function show(e){var b=e.currentTarget,r=b.getBoundingClientRect();v.textContent=b.dataset.v;n.textContent=b.dataset.n;tip.style.display='block';
-var x=Math.min(r.right+10,innerWidth-tip.offsetWidth-8),y=r.top+r.height/2-tip.offsetHeight/2;tip.style.left=x+'px';tip.style.top=y+'px';}
-function hide(){tip.style.display='none';}
-document.querySelectorAll('.bar').forEach(function(b){b.addEventListener('pointerenter',show);b.addEventListener('focus',show);b.addEventListener('pointerleave',hide);b.addEventListener('blur',hide);});
-addEventListener('scroll',hide,{passive:true});})();`;
+  + `<div><h4>＋ 优势</h4><ul>${li(p.pros)}</ul></div><div><h4>－ 劣势</h4><ul>${li(p.cons)}</ul></div></div></div>`).join('') + `</div>`;
 
 writeFileSync(join(docs, 'compare.html'), head(`纵向对比 · ${SITE_TITLE}`, COMPARE_CSS)
   + topBar('纵向对比', 'compare')
-  + `<p class="lead">把 10 种模式放在一起比：先看同一任务的实测成本，再看结构差异，最后按场景选。点模式名可以跳到它的图。</p>`
-  + `<h2 id="cost">实测成本</h2><p class="sub">${esc(measured.date)}，${esc(measured.platform)}，同一任务各跑 ${measured.runs} 次。只跑一次，看量级，不看小数点。</p>`
-  + `<div class="charts">${barChart('secs', '耗时（秒）', '墙钟时间')}${barChart('tokens', 'Token 消耗', '×N 是相对单 Agent 的倍数')}${barChart('final_cjk', '最终答案长度（汉字）', '各模式写出来的东西多少不一样')}</div>`
-  + measuredTable
-  + `<div class="callout" id="speed"><h3>${esc(notes.speed.title)}</h3>${paras(notes.speed.body)}</div>`
-  + `<h2 id="matrix">结构对比</h2><p class="sub">${esc(structure._note)}串行轮数 = 关键路径上必须依次等待的模型调用次数；同样的输出长度下，它基本决定了耗时。表格可横向滚动。</p>`
+  + `<p class="lead">10 种模式放在同一组维度上比较：先看结构，再按场景选，最后是各自的优劣。点模式名跳到它的流程图；带"架构图"的可以直接看系统架构。</p>`
+  + `<h2 id="matrix">结构对比</h2><p class="sub">${esc(structure._note)}串行轮数是关键路径上必须依次等待的模型调用次数，它和"耗时取决于"一起决定了这种模式快不快。表格可横向滚动。</p>`
   + matrix
   + `<h2 id="choose">按场景选</h2><p class="sub">每种情况下最先考虑的模式；实际可以组合，比如在 MA-04 的每个子任务里套一个 MA-05。</p>`
   + scen
-  + `<h2 id="pros-cons">优劣速查</h2><p class="sub">每种模式的完整优劣、适用场景和代表工具，在它自己的页面里。</p>`
+  + `<h2 id="pros-cons">优劣速查</h2><p class="sub">每种模式的完整优劣、适用场景、架构图和代表工具，在它自己的页面里。</p>`
   + pcg
-  + `<h2 id="sources">来源</h2><p class="sub">优劣和速度结论引用的公开资料；代表工具的出处在各自的官方文档和仓库。</p><ul class="src">`
+  + `<h2 id="sources">来源</h2><p class="sub">优劣里引用的公开资料；代表工具的出处是各自的官方文档和仓库。</p><ul class="src">`
   + notes.sources.map(([t, u]) => `<li><a href="${esc(u)}">${esc(t)}</a></li>`).join('') + `</ul>`
-  + `<div id="tip" role="tooltip"><b></b><span></span></div>`
-  + tail(TIP_JS));
+  + tail());
 
 console.log(JSON.stringify({ ok: true, pages, index: true, compare: true }));

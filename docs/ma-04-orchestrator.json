@@ -4,7 +4,7 @@
  "eyebrow": "多 Agent 协作模式 · MA-04",
  "title": "委派式编排",
  "subtitle": "编排者动态拆任务 → N 个子 Agent 并行（各自全新上下文）→ 编排者汇总：Orchestrator–Worker",
- "caption": "模型调用 2+N 次 · 实测 59s / 12.1k tokens（×4.8），本次拆成 5 个子任务 · 适合可拆分的调研或写作 · 风险：拆分不清会重复劳动，没有验收",
+ "caption": "模型调用 N + 2 次，N 由编排者在运行时决定 · 适合可拆分的调研或写作 · 风险：拆分不清会重复劳动，没有验收",
  "groups": [
   {
    "id": "workers",

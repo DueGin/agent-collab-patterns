@@ -21,74 +21,72 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);colo
 [data-theme="dark"] .th-dark{display:block}[data-theme="dark"] .th-light{display:none}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .th-dark{display:block}:root:not([data-theme="light"]) .th-light{display:none}}
 @media (max-width:640px){main{padding:28px 16px 48px}.top h1{font-size:28px}}
-.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px 18px;margin:14px 0 0;padding:12px 14px;border:1px solid var(--sc-rule);border-radius:8px}
-.facts div{display:flex;flex-direction:column}.facts dt{font-size:12px;color:var(--sc-soft)}.facts dd{margin:0;font-size:13px;color:var(--sc-ink)}
 .grid{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:18px}
 .card{display:flex;flex-direction:column;height:100%;text-decoration:none;color:inherit;border:1px solid var(--sc-rule);border-radius:10px;overflow:hidden}
 .card:hover,.card:focus-visible{border-color:var(--sc-accent);outline:none}
 .thumb{aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;padding:12px;border-bottom:1px solid var(--sc-rule);overflow:hidden}
 .thumb img{max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain}
 .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
-.id{font:12px var(--sc-font-mono);color:var(--sc-soft)}
+.idl{display:flex;align-items:center;gap:8px}.id{font:12px var(--sc-font-mono);color:var(--sc-soft)}
+.badge{font-size:11px;color:var(--sc-accent);border:1px solid var(--sc-accent);border-radius:4px;padding:0 5px}
 .body h3{margin:0;font-size:17px;font-weight:600}
 .topo{margin:0;font-size:13px;color:var(--sc-muted)}
-.st{display:flex;gap:14px;font:12px var(--sc-font-mono);color:var(--sc-muted);margin:2px 0}
+.st{display:flex;flex-wrap:wrap;gap:4px 14px;font:12px var(--sc-font-mono);color:var(--sc-muted);margin:2px 0}
 .pm{margin:0;font-size:13px;line-height:1.6}.pm b{font-weight:600}
 .tl{margin:auto 0 0;padding-top:8px;font-size:12px;color:var(--sc-soft);line-height:1.6}</style></head><body><main><header class="top"><h1>多 Agent 协作模式图解</h1><nav aria-label="站点导航">
 <a href="./" class="cur" aria-current="page">全部模式</a>
 <a href="compare.html">纵向对比</a>
-<a href="https://github.com/DueGin/agent-collab-patterns">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header><p class="lead">10 种常见的多 Agent 协作模式，每种一张可交互的动画图（悬停追踪、点击聚焦、◀ ▶ 单步）。每张图下方列出优劣和市面上遵循该模式的工具；想比较实测成本和结构差异，看 <a href="compare.html">纵向对比</a>。</p><ol class="grid"><li><a class="card" href="ma-00-single.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-00-single-light.png" alt="单 Agent 基线 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-00-single-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-00</span><h3>单 Agent 基线</h3><p class="topo">一个 Agent 一次完成</p>
-<div class="st"><span>调用 1</span><span>串行 1 轮</span><span>24s</span><span>2.5K tokens ×1.0</span></div>
+<a href="https://github.com/DueGin/agent-collab-patterns">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header><p class="lead">10 种常见的多 Agent 协作模式。每种一张可交互的协作流程图（悬停追踪、点击聚焦、◀ ▶ 单步）；其中 4 种需要额外基础设施的，另附系统架构图。每张图下方列出优劣和市面上遵循该模式的工具；各模式之间的横向比较见 <a href="compare.html">纵向对比</a>。</p><ol class="grid"><li><a class="card" href="ma-00-single.html">
+<div class="thumb"><img class="th-light" src="thumbs/ma-00-single-light.png" alt="单 Agent 基线 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-00-single-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-00</span></div><h3>单 Agent 基线</h3><p class="topo">一个 Agent 一次完成</p>
+<div class="st"><span>调用 1</span><span>串行 1 轮</span><span>并行 无</span></div>
 <p class="pm"><b>＋</b> 任务一次调用就能完成时，成本和延迟都最低</p><p class="pm"><b>－</b> 只有一个视角，没有任何自检</p>
 <p class="tl">Claude Code / Codex · Cursor / Copilot · ChatGPT / Claude</p></div></a></li><li><a class="card" href="ma-01-pipeline.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-01-pipeline-light.png" alt="顺序流水线 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-01-pipeline-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-01</span><h3>顺序流水线</h3><p class="topo">研究员 → 撰稿人 → 编辑</p>
-<div class="st"><span>调用 3</span><span>串行 3 轮</span><span>72s</span><span>10.2K tokens ×4.1</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-01-pipeline-light.png" alt="顺序流水线 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-01-pipeline-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-01</span></div><h3>顺序流水线</h3><p class="topo">研究员 → 撰稿人 → 编辑</p>
+<div class="st"><span>调用 K</span><span>串行 K 轮</span><span>并行 无</span></div>
 <p class="pm"><b>＋</b> 角色分工清晰，每一棒只做一件事</p><p class="pm"><b>－</b> 传话失真：每一棒只看到上一棒的产出</p>
 <p class="tl">MetaGPT · ChatDev · CrewAI · MS Agent Framework · Archon · Dify / Coze / n8n</p></div></a></li><li><a class="card" href="ma-02-router.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-02-router-light.png" alt="路由分诊 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-02-router-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-02</span><h3>路由分诊</h3><p class="topo">分类器 → 1 位专家</p>
-<div class="st"><span>调用 2</span><span>串行 2 轮</span><span>27s</span><span>3.9K tokens ×1.5</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-02-router-light.png" alt="路由分诊 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-02-router-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-02</span></div><h3>路由分诊</h3><p class="topo">分类器 → 1 位专家</p>
+<div class="st"><span>调用 2</span><span>串行 2 轮</span><span>并行 无（只运行 1 位专家）</span></div>
 <p class="pm"><b>＋</b> 只多一次分类调用，成本几乎和单 Agent 一样</p><p class="pm"><b>－</b> 分错类就全错，而且没有纠正机制</p>
 <p class="tl">OpenAI Agents SDK · Claude Code · Multica · Dify / Coze</p></div></a></li><li><a class="card" href="ma-03-parallel.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-03-parallel-light.png" alt="并行分工 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-03-parallel-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-03</span><h3>并行分工</h3><p class="topo">3 个固定视角并行 → 汇总</p>
-<div class="st"><span>调用 4</span><span>串行 2 轮</span><span>41s</span><span>8.8K tokens ×3.5</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-03-parallel-light.png" alt="并行分工 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-03-parallel-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-03</span></div><h3>并行分工</h3><p class="topo">3 个固定视角并行 → 汇总</p>
+<div class="st"><span>调用 K + 1</span><span>串行 2 轮</span><span>并行 K 路，视角事先固定</span></div>
 <p class="pm"><b>＋</b> 几路同时进行，耗时 ≈ 最慢的一路 + 汇总一轮</p><p class="pm"><b>－</b> 视角是事先定死的，遇到新问题无法调整</p>
 <p class="tl">Google ADK · MS Agent Framework · LangGraph · Dify</p></div></a></li><li><a class="card" href="ma-04-orchestrator.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-04-orchestrator-light.png" alt="委派式编排 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-04-orchestrator-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-04</span><h3>委派式编排</h3><p class="topo">编排者动态拆分 → N 个子 Agent → 汇总</p>
-<div class="st"><span>调用 2+N</span><span>串行 3 轮</span><span>59s</span><span>12.1K tokens ×4.8</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-04-orchestrator-light.png" alt="委派式编排 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-04-orchestrator-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-04</span><span class="badge">含架构图</span></div><h3>委派式编排</h3><p class="topo">编排者动态拆分 → N 个子 Agent → 汇总</p>
+<div class="st"><span>调用 N + 2</span><span>串行 3 轮</span><span>并行 N 路，运行时决定</span></div>
 <p class="pm"><b>＋</b> 按任务动态拆分，适应性强</p><p class="pm"><b>－</b> 拆分不清就会重复劳动或遗漏</p>
 <p class="tl">Claude Code · Codex · Kimi Code · Hermes Agent · LangGraph · AWS CAO / Paseo</p></div></a></li><li><a class="card" href="ma-05-critic-loop.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-05-critic-loop-light.png" alt="生成-评审循环 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-05-critic-loop-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-05</span><h3>生成-评审循环</h3><p class="topo">写 → 评 → 改（最多 2 轮）</p>
-<div class="st"><span>调用 2~5</span><span>串行 2~5 轮</span><span>99s</span><span>20.0K tokens ×8.0</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-05-critic-loop-light.png" alt="生成-评审循环 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-05-critic-loop-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-05</span><span class="badge">含架构图</span></div><h3>生成-评审循环</h3><p class="topo">写 → 评 → 改（最多 2 轮）</p>
+<div class="st"><span>调用 2 ~ 2R + 1</span><span>串行 2 ~ 2R + 1 轮</span><span>并行 无</span></div>
 <p class="pm"><b>＋</b> 质量逐轮提升，有明确的验收标准</p><p class="pm"><b>－</b> 标准偏松等于没审，偏严会一直打回、烧钱</p>
 <p class="tl">Claude Code + Codex · Claude Code · Orchestrator.inc · Google ADK · OpenAI Agents SDK</p></div></a></li><li><a class="card" href="ma-06-debate.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-06-debate-light.png" alt="多 Agent 辩论 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-06-debate-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-06</span><h3>多 Agent 辩论</h3><p class="topo">主持人 → 正反立论 → 交叉反驳 → 裁判</p>
-<div class="st"><span>调用 6</span><span>串行 4 轮</span><span>54s</span><span>11.3K tokens ×4.5</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-06-debate-light.png" alt="多 Agent 辩论 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-06-debate-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-06</span></div><h3>多 Agent 辩论</h3><p class="topo">主持人 → 正反立论 → 交叉反驳 → 裁判</p>
+<div class="st"><span>调用 2R + 2</span><span>串行 R + 2 轮</span><span>并行 2 路（正方、反方）</span></div>
 <p class="pm"><b>＋</b> 正反对抗，能逼出反例和隐含假设</p><p class="pm"><b>－</b> 多数基准上并不比单模型 CoT 或多次采样投票更好</p>
 <p class="tl">MAD（Liang et al.） · Multi-Agent Debate（Du et al.） · MS Agent Framework · Maestro</p></div></a></li><li><a class="card" href="ma-07-voting.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-07-voting-light.png" alt="投票集成 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-07-voting-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-07</span><h3>投票集成</h3><p class="topo">3 份独立答卷 → 评委择优融合</p>
-<div class="st"><span>调用 4</span><span>串行 2 轮</span><span>42s</span><span>14.1K tokens ×5.6</span></div>
+<div class="thumb"><img class="th-light" src="thumbs/ma-07-voting-light.png" alt="投票集成 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-07-voting-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-07</span></div><h3>投票集成</h3><p class="topo">3 份独立答卷 → 评委择优融合</p>
+<div class="st"><span>调用 N + 1</span><span>串行 2 轮</span><span>并行 N 路，同一任务</span></div>
 <p class="pm"><b>＋</b> 多份独立答卷，可以抵消单次失误</p><p class="pm"><b>－</b> 成本约是单次的 N 倍</p>
 <p class="tl">Cursor · Codex Cloud · GitHub Agent HQ · llm-council · Self-Consistency</p></div></a></li><li><a class="card" href="ma-08-blackboard.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-08-blackboard-light.png" alt="团队协作 · 共享黑板 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-08-blackboard-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-08</span><h3>团队协作 · 共享黑板</h3><p class="topo">组长 → 3 人发帖 → 互看回应 → 整合</p>
-<div class="st"><span>调用 8</span><span>串行 4 轮</span><span>54s</span><span>19.6K tokens ×7.8</span></div>
-<p class="pm"><b>＋</b> 成员之间能互相看见、互相纠错</p><p class="pm"><b>－</b> token 消耗随帖子数增长（实测 ×7.8）</p>
+<div class="thumb"><img class="th-light" src="thumbs/ma-08-blackboard-light.png" alt="团队协作 · 共享黑板 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-08-blackboard-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-08</span><span class="badge">含架构图</span></div><h3>团队协作 · 共享黑板</h3><p class="topo">组长 → 3 人发帖 → 互看回应 → 整合</p>
+<div class="st"><span>调用 K × R + 2</span><span>串行 R + 2 轮</span><span>并行 K 路</span></div>
+<p class="pm"><b>＋</b> 成员之间能互相看见、互相纠错</p><p class="pm"><b>－</b> 每轮每人都要读全部帖子，token 随人数和轮数快速增长</p>
 <p class="tl">Claude Code · Codex · Hermes Agent · DeepSeek Harness · hcom · Paperclip</p></div></a></li><li><a class="card" href="ma-09-contract-gate.html">
-<div class="thumb"><img class="th-light" src="thumbs/ma-09-contract-gate-light.png" alt="契约编排 + 闸门验证 拓扑图" loading="lazy"><img class="th-dark" src="thumbs/ma-09-contract-gate-dark.png" alt="" loading="lazy"></div>
-<div class="body"><span class="id">MA-09</span><h3>契约编排 + 闸门验证</h3><p class="topo">规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合</p>
-<div class="st"><span>调用 3+N ~ 4+2N</span><span>串行 4~6 轮</span><span>208s</span><span>68.4K tokens ×27.3</span></div>
-<p class="pm"><b>＋</b> 事前用契约防止重复劳动：写集合不相交，计划用代码校验</p><p class="pm"><b>－</b> 流程最重，成本最高（实测 ×27.3）</p>
-<p class="tl">agentguild · Kimi Code · Orchestrator.inc · Gas Town · Bernstein</p></div></a></li></ol><footer>实测：2026-11-06 在 Dify 1.17.1 上同一任务各跑 1 次（执行 deepseek-v4.1-flash，评审 claude-sonnet-5-5），看量级即可。
-优劣是按实现结构和公开研究归纳的，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer></main><script>(function(){var b=document.getElementById('theme-btn');if(!b)return;var r=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');
+<div class="thumb"><img class="th-light" src="thumbs/ma-09-contract-gate-light.png" alt="契约编排 + 闸门验证 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-09-contract-gate-dark.png" alt="" loading="lazy"></div>
+<div class="body"><div class="idl"><span class="id">MA-09</span><span class="badge">含架构图</span></div><h3>契约编排 + 闸门验证</h3><p class="topo">规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合</p>
+<div class="st"><span>调用 N + 3 ~ 2N + 4</span><span>串行 4 ~ 6 轮</span><span>并行 N 路，任务卡隔离</span></div>
+<p class="pm"><b>＋</b> 事前用契约防止重复劳动：写集合不相交，计划用代码校验</p><p class="pm"><b>－</b> 流程最重，调用次数最多</p>
+<p class="tl">agentguild · Kimi Code · Orchestrator.inc · Gas Town · Bernstein</p></div></a></li></ol><footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer></main><script>(function(){var b=document.getElementById('theme-btn');if(!b)return;var r=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');
 function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':m.matches;}function sync(){b.setAttribute('aria-checked',String(dark()));b.textContent=dark()?'浅色':'深色';}
 b.addEventListener('click',function(){var t=dark()?'light':'dark';r.setAttribute('data-theme',t);try{localStorage.setItem('seecode:theme',t);}catch(e){}sync();});
 m.addEventListener&&m.addEventListener('change',sync);sync();})();</script></body></html>

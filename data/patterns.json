@@ -1,12 +1,5 @@
 {
-  "_note": "多 Agent 协作模式的全部展示数据。scripts/site.mjs 用它生成 docs/ 下的首页、对比页，并给每张图页面注入导航、优劣和代表工具。",
-  "measured": {
-    "date": "2026-11-06",
-    "platform": "Dify 1.17.1",
-    "executor": "deepseek-v4.1-flash",
-    "reviewer": "claude-sonnet-5-5",
-    "runs": 1
-  },
+  "_note": "多 Agent 协作模式的全部展示数据。scripts/site.mjs 用它生成首页、对比页，并给每张图页面注入导航、架构图、优劣和代表工具。",
   "scenarios": [
     {
       "need": "简单、边界清楚的问题",
@@ -67,8 +60,6 @@
       "short": "单 Agent",
       "topo": "一个 Agent 一次完成",
       "calls": "1",
-      "secs": 24,
-      "tokens": 2506,
       "pros": [
         "任务一次调用就能完成时，成本和延迟都最低",
         "没有协调开销，没有传话失真",
@@ -105,15 +96,12 @@
           "kind": "厂商"
         }
       ],
-      "x": 1.0,
-      "calls_run": "1",
       "rounds": "1",
       "parallel": "无",
       "visibility": "—（只有一个 Agent）",
       "check": "无",
       "rework": "无",
-      "final_cjk": 666,
-      "run_note": "—"
+      "latency": "一次调用的长度"
     },
     {
       "slug": "ma-01-pipeline",
@@ -121,9 +109,7 @@
       "name": "顺序流水线",
       "short": "流水线",
       "topo": "研究员 → 撰稿人 → 编辑",
-      "calls": "3",
-      "secs": 72,
-      "tokens": 10209,
+      "calls": "K",
       "pros": [
         "角色分工清晰，每一棒只做一件事",
         "每个环节可以单独替换、单独调优",
@@ -174,15 +160,12 @@
           "kind": "平台"
         }
       ],
-      "x": 4.1,
-      "calls_run": "3",
-      "rounds": "3",
+      "rounds": "K",
       "parallel": "无",
       "visibility": "每一棒只看到上一棒的产出",
-      "check": "编辑审校（同一条链、同一模型）",
-      "rework": "无",
-      "final_cjk": 3063,
-      "run_note": "—"
+      "check": "下游角色顺带审校（同一条链）",
+      "rework": "无，不回头",
+      "latency": "各棒耗时相加"
     },
     {
       "slug": "ma-02-router",
@@ -191,8 +174,6 @@
       "short": "路由",
       "topo": "分类器 → 1 位专家",
       "calls": "2",
-      "secs": 27,
-      "tokens": 3860,
       "pros": [
         "只多一次分类调用，成本几乎和单 Agent 一样",
         "每类问题都交给最合适的专家处理",
@@ -233,15 +214,12 @@
           "kind": "平台"
         }
       ],
-      "x": 1.5,
-      "calls_run": "2",
       "rounds": "2",
       "parallel": "无（只运行 1 位专家）",
       "visibility": "—",
       "check": "无",
       "rework": "无",
-      "final_cjk": 900,
-      "run_note": "分到「技术与工程」"
+      "latency": "分类 + 1 位专家"
     },
     {
       "slug": "ma-03-parallel",
@@ -249,9 +227,7 @@
       "name": "并行分工",
       "short": "并行分工",
       "topo": "3 个固定视角并行 → 汇总",
-      "calls": "4",
-      "secs": 41,
-      "tokens": 8777,
+      "calls": "K + 1",
       "pros": [
         "几路同时进行，耗时 ≈ 最慢的一路 + 汇总一轮",
         "各路互相看不见，不会被彼此带偏",
@@ -292,15 +268,12 @@
           "kind": "平台"
         }
       ],
-      "x": 3.5,
-      "calls_run": "4",
       "rounds": "2",
-      "parallel": "3 路",
-      "visibility": "3 位专家互相看不见",
+      "parallel": "K 路，视角事先固定",
+      "visibility": "各路互相看不见",
       "check": "无（汇总者只负责合并）",
       "rework": "无",
-      "final_cjk": 961,
-      "run_note": "—"
+      "latency": "最慢的一路 + 汇总"
     },
     {
       "slug": "ma-04-orchestrator",
@@ -308,25 +281,23 @@
       "name": "委派式编排",
       "short": "委派式",
       "topo": "编排者动态拆分 → N 个子 Agent → 汇总",
-      "calls": "2+N",
-      "secs": 59,
-      "tokens": 12095,
+      "calls": "N + 2",
       "pros": [
         "按任务动态拆分，适应性强",
-        "子 Agent 各自用全新上下文并行跑；任务大时能明显缩短耗时",
+        "任务大且可拆分时能明显缩短耗时（Anthropic 的调研系统：复杂查询最多快约 90%）",
         "Claude Code、Codex、Kimi Code、Hermes 等编码 Agent 都内置了这种做法"
       ],
       "cons": [
         "拆分不清就会重复劳动或遗漏",
         "没有验收环节，子任务做错也会被直接汇总",
-        "编排者容易成为瓶颈"
+        "token 成本高（Anthropic：多 Agent 系统约为普通对话的 15 倍）"
       ],
       "fit": [
         "可拆分的调研或写作",
         "只读的大范围探索（例如搜代码库）"
       ],
       "unfit": [
-        "强顺序依赖的任务",
+        "强顺序依赖的任务（Google 等：多 Agent 在这类任务上下降 39–70%）",
         "多个子任务要写同一批文件"
       ],
       "tools": [
@@ -361,15 +332,13 @@
           "kind": "第三方"
         }
       ],
-      "x": 4.8,
-      "calls_run": "7",
       "rounds": "3",
-      "parallel": "N 路（本次 5）",
+      "parallel": "N 路，运行时决定",
       "visibility": "子 Agent 互相看不见，只回报编排者",
       "check": "无（编排者直接汇总）",
       "rework": "无",
-      "final_cjk": 1993,
-      "run_note": "拆成 5 个子任务"
+      "latency": "拆分 + 最慢的子任务 + 汇总",
+      "arch": "ma-04-orchestrator-arch"
     },
     {
       "slug": "ma-05-critic-loop",
@@ -377,9 +346,7 @@
       "name": "生成-评审循环",
       "short": "生成-评审",
       "topo": "写 → 评 → 改（最多 2 轮）",
-      "calls": "2~5",
-      "secs": 99,
-      "tokens": 20020,
+      "calls": "2 ~ 2R + 1",
       "pros": [
         "质量逐轮提升，有明确的验收标准",
         "评审员更强、上下文干净时提升明显（Codex 写、Claude 审：71.6% → 89.7%）",
@@ -387,7 +354,7 @@
       ],
       "cons": [
         "标准偏松等于没审，偏严会一直打回、烧钱",
-        "每多一轮就多一段串行等待（实测 99s，×8.0）",
+        "每多一轮就多一段串行等待，成本也随轮数增加",
         "评审员比写手弱时会帮倒忙（Claude 写、Codex 审：91.4% → 82.8%）",
         "评审员和写手同一家时，错误往往相关，盲点也相同"
       ],
@@ -426,15 +393,13 @@
           "kind": "框架"
         }
       ],
-      "x": 8.0,
-      "calls_run": "5",
-      "rounds": "2~5",
+      "rounds": "2 ~ 2R + 1",
       "parallel": "无",
       "visibility": "写手能看到评审意见",
-      "check": "跨厂商评审员按 4 项打分，不达标就打回",
-      "rework": "最多 2 轮",
-      "final_cjk": 1378,
-      "run_note": "两轮都没通过，输出第 3 版"
+      "check": "独立评审员按标准打分，不达标打回",
+      "rework": "最多 R 轮",
+      "latency": "（写 + 评）× 轮数",
+      "arch": "ma-05-critic-loop-arch"
     },
     {
       "slug": "ma-06-debate",
@@ -442,9 +407,7 @@
       "name": "多 Agent 辩论",
       "short": "辩论",
       "topo": "主持人 → 正反立论 → 交叉反驳 → 裁判",
-      "calls": "6",
-      "secs": 54,
-      "tokens": 11322,
+      "calls": "2R + 2",
       "pros": [
         "正反对抗，能逼出反例和隐含假设",
         "裁判看到双方的完整论证再做取舍",
@@ -485,15 +448,12 @@
           "kind": "第三方"
         }
       ],
-      "x": 4.5,
-      "calls_run": "6",
-      "rounds": "4",
+      "rounds": "R + 2",
       "parallel": "2 路（正方、反方）",
-      "visibility": "反驳时能看到双方立论",
-      "check": "跨厂商裁判",
+      "visibility": "反驳时能看到对方的论证",
+      "check": "裁判",
       "rework": "无",
-      "final_cjk": 1060,
-      "run_note": "—"
+      "latency": "主持 + 每轮较慢的一方 × R + 裁判"
     },
     {
       "slug": "ma-07-voting",
@@ -501,9 +461,7 @@
       "name": "投票集成",
       "short": "投票",
       "topo": "3 份独立答卷 → 评委择优融合",
-      "calls": "4",
-      "secs": 42,
-      "tokens": 14139,
+      "calls": "N + 1",
       "pros": [
         "多份独立答卷，可以抵消单次失误",
         "有标准答案的题上，多次采样投票通常比辩论更好",
@@ -549,15 +507,12 @@
           "kind": "学术"
         }
       ],
-      "x": 5.6,
-      "calls_run": "4",
       "rounds": "2",
-      "parallel": "3 路",
-      "visibility": "3 位候选者互相看不见",
-      "check": "跨厂商评委打分、择优融合",
+      "parallel": "N 路，同一任务",
+      "visibility": "候选者互相看不见",
+      "check": "评委打分、择优或投票",
       "rework": "无",
-      "final_cjk": 1442,
-      "run_note": "—"
+      "latency": "最慢的一份答卷 + 评委"
     },
     {
       "slug": "ma-08-blackboard",
@@ -565,16 +520,14 @@
       "name": "团队协作 · 共享黑板",
       "short": "共享黑板",
       "topo": "组长 → 3 人发帖 → 互看回应 → 整合",
-      "calls": "8",
-      "secs": 54,
-      "tokens": 19643,
+      "calls": "K × R + 2",
       "pros": [
         "成员之间能互相看见、互相纠错",
         "讨论过程都留在黑板上，可以追溯",
         "适合多假设并行排查"
       ],
       "cons": [
-        "token 消耗随帖子数增长（实测 ×7.8）",
+        "每轮每人都要读全部帖子，token 随人数和轮数快速增长",
         "讨论可能发散、收不住",
         "多人写同一处时容易互相覆盖"
       ],
@@ -618,15 +571,13 @@
           "kind": "第三方"
         }
       ],
-      "x": 7.8,
-      "calls_run": "8",
-      "rounds": "4",
-      "parallel": "3 路",
-      "visibility": "第 2 轮能看到所有人的帖子",
+      "rounds": "R + 2",
+      "parallel": "K 路",
+      "visibility": "第 2 轮起能看到所有人的帖子",
       "check": "质疑者角色 + 组长整合",
       "rework": "无",
-      "final_cjk": 858,
-      "run_note": "—"
+      "latency": "建板 + 每轮最慢的成员 × R + 整合",
+      "arch": "ma-08-blackboard-arch"
     },
     {
       "slug": "ma-09-contract-gate",
@@ -634,9 +585,7 @@
       "name": "契约编排 + 闸门验证",
       "short": "契约+闸门",
       "topo": "规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合",
-      "calls": "3+N ~ 4+2N",
-      "secs": 208,
-      "tokens": 68390,
+      "calls": "N + 3 ~ 2N + 4",
       "pros": [
         "事前用契约防止重复劳动：写集合不相交，计划用代码校验",
         "有中心协调：Google 等的实验里，错误放大约 4.4 倍，而各自独立并行约 17.2 倍",
@@ -644,8 +593,8 @@
         "全程可追溯，附验收对照表"
       ],
       "cons": [
-        "流程最重，成本最高（实测 ×27.3）",
-        "最慢（实测 208s）：评审、返工都是串行的",
+        "流程最重，调用次数最多",
+        "关键路径最长：规划、闸门、评审、返工都要串行等待",
         "搭建和维护成本高",
         "简单任务用它很不划算"
       ],
@@ -684,23 +633,29 @@
           "kind": "第三方"
         }
       ],
-      "x": 27.3,
-      "calls_run": "10",
-      "rounds": "4~6",
-      "parallel": "N 路（本次 4）",
-      "visibility": "执行者互相看不见（任务卡隔离）",
-      "check": "代码校验计划 + 代码规则闸门 + 跨厂商评审",
-      "rework": "只返工未通过项，1 轮",
-      "final_cjk": 1720,
-      "run_note": "首次规划未通过校验、重做后通过；4 个子任务，T1、T2 返工"
+      "rounds": "4 ~ 6",
+      "parallel": "N 路，任务卡隔离",
+      "visibility": "执行者互相看不见",
+      "check": "代码校验计划 + 规则闸门 + 独立评审",
+      "rework": "只返工未通过项",
+      "latency": "规划 + 最慢的执行者 + 评审 + 返工 + 整合",
+      "arch": "ma-09-contract-gate-arch"
     }
   ],
   "structure": {
-    "_note": "结构属性，按 Dify 演示的实现（patterns.py）核对，不是主观评分。",
+    "_note": "每种模式的典型实现。K = 成员或视角数，N = 子任务或候选数，R = 轮数；流程图里的示例取 K = 3、R = 2。",
     "cols": [
+      [
+        "calls",
+        "模型调用"
+      ],
       [
         "rounds",
         "串行轮数"
+      ],
+      [
+        "latency",
+        "耗时取决于"
       ],
       [
         "parallel",
@@ -721,16 +676,6 @@
     ]
   },
   "notes": {
-    "speed": {
-      "title": "单 Agent 真的最快吗？只在任务小、或强顺序依赖时成立",
-      "body": [
-        "这次实测里单 Agent 确实最快（24s），但前提有两个：<b>任务小</b>（一份不到 1200 字的方案），<b>它写得也最少</b>（最终答案约 670 字，其它模式约 860–3,060 字）。",
-        "耗时主要由<b>关键路径上的串行轮数</b>决定。单 Agent 只有 1 轮；路由、并行分工、投票是 2 轮（27–42s）；辩论、共享黑板是 4 轮（54s）；生成-评审最多 5 轮（99s）；契约编排是 4–6 轮外加代码闸门（208s）。<b>一次调用就能写完的任务，拆分、汇总、评审都只是在加轮数。</b>",
-        "<b>任务大、能拆成多个独立且耗时的子任务时，结论反过来</b>：并行扇出的耗时 ≈ 最慢的一路 + 汇总。Anthropic 的 Research 系统用 3–5 个并行子 Agent，复杂查询的调研时间最多缩短约 90%；Kimi K2.5 的 Agent Swarm 在 WideSearch 上达到同等质量的耗时缩短 3–4.5 倍。代价是 token：Anthropic 报告多 Agent 系统约为普通对话的 15 倍。另外，单 Agent 在内部并行调用工具（如 LLMCompiler，最高 3.7 倍）往往已经能拿到大部分提速。",
-        "<b>步骤强顺序依赖的任务</b>，拆给多个 Agent 既不快、效果还会变差：Google 等的实验里，所有多 Agent 变体在这类任务上下降了 39–70%。",
-        "<b>所以</b>：小任务、强顺序依赖 → 单 Agent 最快也最省；大而可拆分 → 并行扇出（MA-03、MA-04）更快但更贵；加评审、闸门的模式（MA-05、MA-09）是拿时间换质量，几乎总是更慢。"
-      ]
-    },
     "sources": [
       [
         "Anthropic：How we built our multi-agent research system（并行提速约 90%、token 约 15 倍、子 Agent 输出写文件）",
@@ -743,14 +688,6 @@
       [
         "Google Research 等：Towards a Science of Scaling Agent Systems（错误放大 17.2× / 4.4×，顺序任务下降 39–70%）",
         "https://arxiv.org/abs/2512.08296"
-      ],
-      [
-        "Kimi K2.5 技术报告：Agent Swarm（WideSearch 提速 3–4.5 倍）",
-        "https://arxiv.org/abs/2602.02276"
-      ],
-      [
-        "LLMCompiler：单 Agent 内并行调用工具（最高 3.7 倍）",
-        "https://arxiv.org/abs/2312.04511"
       ],
       [
         "Stop Overvaluing Multi-Agent Debate（MAD 多数基准不胜 CoT / 自洽；异质模型有帮助）",

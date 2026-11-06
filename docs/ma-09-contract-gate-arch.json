@@ -1,0 +1,76 @@
+{
+  "type": "architecture",
+  "dir": "TB",
+  "lang": "zh-CN",
+  "watermark": false,
+  "budget": "faithful",
+  "eyebrow": "多 Agent 协作模式 · MA-09 · 系统架构",
+  "title": "契约编排 + 闸门验证 · 系统架构",
+  "subtitle": "调度用确定性代码，Agent 只负责规划、执行和评审；每个任务一个隔离工作区，合并由单一写者串行完成",
+  "caption": "参考实现：Kimi Code Tower（范围不相交 + 合并检查）、Gas Town（Refinery 合并队列）、Bernstein（确定性调度 + 合并闸门）、agentguild · 关键：写操作单线程，其它 Agent 只贡献内容",
+  "groups": [
+    {"id":"ctl","label":"控制面","style":"dashed"},
+    {"id":"exec","label":"执行面 · 每张任务卡一个执行者、一个 git worktree","style":"dashed"},
+    {"id":"gate","label":"闸门","style":"dashed"}
+  ],
+  "nodes": [
+    {"id":"task","label":"用户任务","kind":"input","icon":"document","row":0,"col":1},
+    {"id":"planner","label":"规划者 Agent","sub":"契约 · 拆分 · 验收标准","icon":"person","row":1,"col":0},
+    {"id":"orch","label":"编排器","sub":"确定性代码调度","icon":"gear","focal":true,"group":"ctl","row":1,"col":1},
+    {
+      "id": "state",
+      "label": "状态库",
+      "sub": "任务卡 · 事件日志",
+      "kind": "store",
+      "icon": "database",
+      "group": "ctl",
+      "row": 1,
+      "col": 2
+    },
+    {"id":"val","label":"计划校验","sub":"写集合不相交 · 依赖","kind":"security","icon":"code","row":2,"col":0},
+    {"id":"w1","label":"执行者 1","sub":"只改自己的范围","icon":"person","group":"exec","row":3,"col":0},
+    {"id":"w2","label":"执行者 2","sub":"只改自己的范围","icon":"person","group":"exec","row":3,"col":1},
+    {"id":"wn","label":"执行者 N","sub":"只改自己的范围","icon":"person","group":"exec","row":3,"col":2},
+    {
+      "id": "rule",
+      "label": "规则闸门",
+      "sub": "范围 · 测试 · 冲突",
+      "kind": "security",
+      "icon": "lock",
+      "group": "gate",
+      "row": 4,
+      "col": 1
+    },
+    {"id":"rev","label":"评审员","sub":"另一家模型","icon":"check","group":"gate","row":5,"col":1},
+    {"id":"merge","label":"合并队列","sub":"单写者 · 串行合并","icon":"gear","focal":true,"row":6,"col":1},
+    {"id":"repo","label":"主干","kind":"store","icon":"code","row":7,"col":1}
+  ],
+  "edges": [
+    ["task","orch","","primary"],
+    ["orch","planner","请求计划"],
+    ["planner","val","计划"],
+    {"from":"orch","to":"state","both":true},
+    ["w1","rule"],
+    ["w2","rule","提交 diff","primary"],
+    ["wn","rule"],
+    ["rule","rev","通过的","primary"],
+    ["rev","merge","批准","primary"],
+    {"from":"rev","to":"orch","label":"返工","kind":"return"},
+    ["merge","repo","","primary"],
+    ["val","orch","合格的任务卡"],
+    ["orch","w2","派发任务卡（每人一张）","primary"]
+  ],
+  "legend": {
+    "title": "图例",
+    "entries": {
+      "input": {"label":"输入"},
+      "backend": {"label":"Agent / 组件"},
+      "store": {"label":"共享状态"},
+      "security": {"label":"代码校验 / 闸门"},
+      "focal": {"label":"关键节点"},
+      "primary": {"label":"主路径"},
+      "return": {"label":"返工"},
+      "default": {"label":"调用 / 数据流"}
+    }
+  }
+}

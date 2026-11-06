@@ -1,0 +1,17 @@
+{"type":"architecture","dir":"LR","lang":"zh-CN","watermark":false,"budget":"faithful",
+"eyebrow":"多 Agent 协作模式 · MA-05 · 系统架构","title":"生成-评审循环 · 系统架构",
+"subtitle":"写手和评审员隔离：评审员只读、上下文干净，按固定裁决格式回复，循环有轮次上限",
+"caption":"参考实现：codex-plugin-cc 的评审闸门、Claude Code 的 Stop hook（退出码 2 打回）、Google ADK 的 LoopAgent · 关键：评审员最好比写手强，并且能跑测试",
+"groups":[{"id":"rv","label":"评审方 · 只读，与写手隔离","style":"dashed"}],
+"nodes":[
+ {"id":"task","label":"任务 + 验收标准","kind":"input","icon":"document","row":1,"col":0},
+ {"id":"writer","label":"写手 Agent","sub":"模型 A · 可写","icon":"person","row":1,"col":1},
+ {"id":"draft","label":"草稿 / 改动","sub":"版本化保存","kind":"store","icon":"database","row":1,"col":2},
+ {"id":"checks","label":"可执行检查","sub":"测试 · lint · 类型","kind":"security","icon":"code","group":"rv","row":0,"col":3},
+ {"id":"rev","label":"评审员 Agent","sub":"模型 B · 干净上下文","icon":"check","focal":true,"group":"rv","row":1,"col":3},
+ {"id":"ctl","label":"裁决 + 轮次控制","sub":"PASS / REVISE · 最多 R 轮","kind":"security","icon":"gear","row":1,"col":4},
+ {"id":"out","label":"通过的版本","kind":"external","icon":"check","row":1,"col":5}],
+"edges":[["task","writer","","primary"],["writer","draft","写","primary"],["draft","checks","运行"],["draft","rev","只读","primary"],
+ ["checks","rev","结果"],["rev","ctl","VERDICT + 意见","primary"],
+ {"from":"ctl","to":"writer","label":"REVISE + 意见","kind":"return"},["ctl","out","PASS 或到上限","primary"]],
+"legend":{"title":"图例","entries":{"input":{"label":"输入"},"external":{"label":"输出"},"backend":{"label":"Agent"},"store":{"label":"共享状态"},"security":{"label":"代码 / 规则"},"focal":{"label":"关键节点"},"primary":{"label":"主路径"},"return":{"label":"打回"},"default":{"label":"调用 / 数据流"}}}}

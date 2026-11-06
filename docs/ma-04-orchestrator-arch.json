@@ -1,0 +1,206 @@
+{
+ "type": "architecture",
+ "dir": "TB",
+ "lang": "zh-CN",
+ "watermark": false,
+ "budget": "faithful",
+ "eyebrow": "多 Agent 协作模式 · MA-04 · 系统架构",
+ "title": "委派式编排 · 系统架构",
+ "subtitle": "编排者通过派发工具开出子 Agent；往下只传任务说明，往上只回结论和引用",
+ "caption": "参考实现：Claude Code 的 Agent 工具、Codex 的 spawn_agent、Hermes 的 delegate_task · 关键：子 Agent 各用全新上下文，产出写进工作区、只回传路径，避免传话失真",
+ "groups": [
+  {
+   "id": "rt",
+   "label": "子 Agent 运行时 · 每个一个全新上下文",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "用户任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "orch",
+   "label": "编排者 Agent",
+   "sub": "主会话 · 拆分与汇总",
+   "icon": "gear",
+   "focal": true,
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "limit",
+   "label": "并发 / 深度上限",
+   "sub": "防止无限派生",
+   "kind": "security",
+   "icon": "lock",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "spawn",
+   "label": "派发工具",
+   "sub": "Agent / spawn_agent",
+   "icon": "code",
+   "row": 2,
+   "col": 1
+  },
+  {
+   "id": "w1",
+   "label": "子 Agent 1",
+   "sub": "独立工具权限",
+   "icon": "person",
+   "group": "rt",
+   "row": 3,
+   "col": 0
+  },
+  {
+   "id": "w2",
+   "label": "子 Agent 2",
+   "sub": "独立工具权限",
+   "icon": "person",
+   "group": "rt",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "wn",
+   "label": "子 Agent N",
+   "sub": "独立工具权限",
+   "icon": "person",
+   "group": "rt",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "tools",
+   "label": "工具 / MCP",
+   "sub": "搜索 · 读代码 · 执行",
+   "kind": "external",
+   "icon": "server",
+   "row": 4,
+   "col": 0
+  },
+  {
+   "id": "ws",
+   "label": "共享工作区",
+   "sub": "产出写文件",
+   "kind": "store",
+   "icon": "database",
+   "row": 4,
+   "col": 2
+  },
+  {
+   "id": "out",
+   "label": "最终答复",
+   "kind": "external",
+   "icon": "check",
+   "row": 1,
+   "col": 2
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "orch",
+   "",
+   "primary"
+  ],
+  [
+   "orch",
+   "spawn",
+   "任务说明",
+   "primary"
+  ],
+  [
+   "limit",
+   "spawn",
+   "约束",
+   "muted"
+  ],
+  [
+   "spawn",
+   "w1"
+  ],
+  [
+   "spawn",
+   "w2",
+   "",
+   "primary"
+  ],
+  [
+   "spawn",
+   "wn"
+  ],
+  [
+   "w1",
+   "tools",
+   "调用"
+  ],
+  [
+   "wn",
+   "ws",
+   "写产出"
+  ],
+  {
+   "from": "w2",
+   "to": "orch",
+   "kind": "return"
+  },
+  [
+   "ws",
+   "orch",
+   "按路径读取",
+   "async"
+  ],
+  [
+   "orch",
+   "out",
+   "汇总",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "外部 / 输出"
+   },
+   "backend": {
+    "label": "Agent / 组件"
+   },
+   "store": {
+    "label": "共享状态"
+   },
+   "security": {
+    "label": "限制 / 校验"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "return": {
+    "label": "回传：只回结论 + 路径"
+   },
+   "async": {
+    "label": "异步读取"
+   },
+   "muted": {
+    "label": "约束"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   }
+  }
+ }
+}
