@@ -1,0 +1,219 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-06",
+ "title": "多 Agent 辩论",
+ "subtitle": "主持人定辩题 → 正反方立论（并行）→ 交叉反驳（并行）→ 裁判裁决并给出综合方案",
+ "caption": "模型调用 6 次 · 实测 54s / 11.3k tokens（×4.5）· 适合决策题、方案取舍 · 风险：容易为了对立而对立，成本高",
+ "groups": [
+  {
+   "id": "r1",
+   "label": "第 1 轮 · 立论",
+   "style": "dashed"
+  },
+  {
+   "id": "r2",
+   "label": "第 2 轮 · 交叉反驳",
+   "style": "dashed"
+  },
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 2,
+   "col": 0
+  },
+  {
+   "id": "host",
+   "label": "主持人",
+   "sub": "定辩题",
+   "icon": "flag",
+   "row": 2,
+   "col": 1
+  },
+  {
+   "id": "pro1",
+   "label": "正方",
+   "sub": "立论",
+   "icon": "person",
+   "group": "r1",
+   "row": 0,
+   "col": 2
+  },
+  {
+   "id": "con1",
+   "label": "反方",
+   "sub": "立论",
+   "icon": "person",
+   "group": "r1",
+   "row": 4,
+   "col": 2
+  },
+  {
+   "id": "pro2",
+   "label": "正方",
+   "sub": "反驳",
+   "icon": "chat",
+   "group": "r2",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "con2",
+   "label": "反方",
+   "sub": "反驳",
+   "icon": "chat",
+   "group": "r2",
+   "row": 3,
+   "col": 3
+  },
+  {
+   "id": "judge",
+   "label": "裁判",
+   "sub": "裁决 + 综合方案",
+   "icon": "star",
+   "focal": true,
+   "row": 2,
+   "col": 4
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 2,
+   "col": 5
+  },
+  {
+   "id": "tool0",
+   "label": "MS Agent Framework",
+   "sub": "GroupChat 编排",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 1
+  },
+  {
+   "id": "tool1",
+   "label": "Maestro",
+   "sub": "Group Chat + moderator",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 2
+  },
+  {
+   "id": "tool2",
+   "label": "CAMEL",
+   "sub": "角色扮演对话",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 3
+  },
+  {
+   "id": "tool3",
+   "label": "Multi-Agent Debate",
+   "sub": "Du et al. 2023",
+   "tag": "学术",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 4
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "host",
+   "",
+   "primary"
+  ],
+  [
+   "host",
+   "pro1",
+   "支持"
+  ],
+  [
+   "host",
+   "con1",
+   "反对"
+  ],
+  [
+   "pro1",
+   "pro2"
+  ],
+  [
+   "con1",
+   "con2"
+  ],
+  [
+   "pro1",
+   "con2",
+   "读对方",
+   "async"
+  ],
+  [
+   "con1",
+   "pro2",
+   "读对方",
+   "async"
+  ],
+  [
+   "pro2",
+   "judge"
+  ],
+  [
+   "con2",
+   "judge"
+  ],
+  [
+   "judge",
+   "out",
+   "",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "async": {
+    "label": "读取对方立论"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful"
+}

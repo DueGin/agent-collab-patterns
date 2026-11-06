@@ -1,0 +1,228 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-08",
+ "title": "团队协作 · 共享黑板",
+ "subtitle": "组长建任务板 → 三名队友各自发帖 → 读到彼此的帖子后回应、修正 → 组长整合；成员之间能通信",
+ "caption": "共 2 轮：第 1 轮各自发帖，第 2 轮看完全部帖子再回应 · 模型调用 8 次 · 实测 54s / 19.6k tokens（×7.8）· 风险：token 多，讨论可能发散",
+ "groups": [
+  {
+   "id": "team",
+   "label": "队友 · 2 轮发帖",
+   "style": "dashed"
+  },
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "lead",
+   "label": "组长",
+   "sub": "建任务板",
+   "icon": "flag",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "res",
+   "label": "研究员",
+   "icon": "person",
+   "group": "team",
+   "row": 0,
+   "col": 2
+  },
+  {
+   "id": "des",
+   "label": "方案设计师",
+   "icon": "person",
+   "group": "team",
+   "row": 1,
+   "col": 2
+  },
+  {
+   "id": "sk",
+   "label": "质疑者",
+   "icon": "person",
+   "group": "team",
+   "row": 2,
+   "col": 2
+  },
+  {
+   "id": "board",
+   "label": "共享黑板",
+   "sub": "所有帖子",
+   "kind": "store",
+   "icon": "chat",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "final",
+   "label": "组长",
+   "sub": "整合交付",
+   "icon": "flag",
+   "row": 1,
+   "col": 4,
+   "focal": true
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 1,
+   "col": 5
+  },
+  {
+   "id": "tool0",
+   "label": "Claude Code",
+   "sub": "Agent Teams 任务表 + 邮箱",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Codex",
+   "sub": "multi-agent V2 mailbox",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "Hermes Agent",
+   "sub": "Kanban 任务板",
+   "tag": "开源",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "DeepSeek Harness",
+   "sub": "Agent Teams",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 3
+  },
+  {
+   "id": "tool4",
+   "label": "hcom",
+   "sub": "终端间消息总线",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 4
+  },
+  {
+   "id": "tool5",
+   "label": "Paperclip / Multica",
+   "sub": "工单看板 + 原子认领",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 5
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "lead",
+   "",
+   "primary"
+  ],
+  [
+   "lead",
+   "res"
+  ],
+  [
+   "lead",
+   "des",
+   "分工"
+  ],
+  [
+   "lead",
+   "sk"
+  ],
+  {
+   "from": "res",
+   "to": "board",
+   "both": true
+  },
+  {
+   "from": "des",
+   "to": "board",
+   "label": "发帖 / 互看",
+   "both": true
+  },
+  {
+   "from": "sk",
+   "to": "board",
+   "both": true
+  },
+  [
+   "board",
+   "final",
+   "第 2 轮帖子",
+   "primary"
+  ],
+  [
+   "final",
+   "out",
+   "",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "store": {
+    "label": "共享黑板（代码节点）"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful"
+}

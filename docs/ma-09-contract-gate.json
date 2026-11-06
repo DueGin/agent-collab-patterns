@@ -1,0 +1,356 @@
+{
+ "type": "flowchart",
+ "lang": "zh-CN",
+ "budget": "faithful",
+ "eyebrow": "多 Agent 协作模式 · MA-09（推荐）",
+ "title": "契约编排 + 闸门验证",
+ "subtitle": "中心化编排 + 写操作单线程 + 明确边界 + 独立验证",
+ "caption": "模型调用约 6+2N 次 · 实测 208s / 68.4k tokens（×27），4 个子任务、计划一次通过、T1/T2 返工 · 适合要求可靠、可审计的多人协作 · 风险：流程最重，简单任务不划算",
+ "groups": [
+  {
+   "id": "pre",
+   "label": "事前 · 契约先行",
+   "style": "dashed"
+  },
+  {
+   "id": "mid",
+   "label": "事中 · 隔离执行",
+   "style": "dashed"
+  },
+  {
+   "id": "post",
+   "label": "事后 · 闸门验证",
+   "style": "dashed"
+  },
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "shape": "terminal",
+   "kind": "input",
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "planner",
+   "label": "规划者",
+   "sub": "① 契约 + 拆分",
+   "icon": "gear",
+   "group": "pre",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "check1",
+   "label": "计划校验",
+   "sub": "② 代码",
+   "kind": "security",
+   "icon": "code",
+   "group": "pre",
+   "row": 2,
+   "col": 1
+  },
+  {
+   "id": "ok",
+   "label": "合格？",
+   "shape": "decision",
+   "group": "pre",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "replan",
+   "label": "按意见重做",
+   "sub": "+ 代码复核",
+   "icon": "gear",
+   "group": "pre",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "dispatch",
+   "label": "派发任务卡",
+   "sub": "③ 写集合不相交",
+   "kind": "security",
+   "icon": "document",
+   "group": "mid",
+   "row": 4,
+   "col": 1
+  },
+  {
+   "id": "w1",
+   "label": "执行者 T1",
+   "sub": "全新上下文",
+   "icon": "person",
+   "group": "mid",
+   "row": 5,
+   "col": 0
+  },
+  {
+   "id": "w2",
+   "label": "执行者 T2",
+   "sub": "全新上下文",
+   "icon": "person",
+   "group": "mid",
+   "row": 5,
+   "col": 1
+  },
+  {
+   "id": "wn",
+   "label": "执行者 Tn",
+   "sub": "全新上下文",
+   "icon": "person",
+   "group": "mid",
+   "row": 5,
+   "col": 2
+  },
+  {
+   "id": "gate1",
+   "label": "闸门① 规则",
+   "sub": "⑤ 代码：契约/空产出/重复",
+   "kind": "security",
+   "icon": "lock",
+   "group": "post",
+   "row": 6,
+   "col": 1
+  },
+  {
+   "id": "gate2",
+   "label": "闸门② 评审",
+   "sub": "⑥ 跨厂商 LLM",
+   "icon": "check",
+   "group": "post",
+   "row": 7,
+   "col": 1
+  },
+  {
+   "id": "rw",
+   "label": "有未通过？",
+   "shape": "decision",
+   "group": "post",
+   "row": 8,
+   "col": 1
+  },
+  {
+   "id": "fix",
+   "label": "定向返工",
+   "sub": "⑧ 只重做未通过项",
+   "icon": "gear",
+   "group": "post",
+   "row": 8,
+   "col": 2
+  },
+  {
+   "id": "integ",
+   "label": "单写者整合",
+   "sub": "⑩ 唯一能写终稿",
+   "icon": "document",
+   "focal": true,
+   "group": "post",
+   "row": 9,
+   "col": 1
+  },
+  {
+   "id": "out",
+   "label": "终稿 + 验收对照表",
+   "shape": "terminal",
+   "kind": "external",
+   "row": 10,
+   "col": 1
+  },
+  {
+   "id": "tool0",
+   "label": "agentguild",
+   "sub": "作者的自建系统",
+   "tag": "自建",
+   "kind": "muted",
+   "group": "tools",
+   "row": 11,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Kimi Code",
+   "sub": "Tower：范围不相交 + 合并检查",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 11,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "Orchestrator.inc",
+   "sub": "PR 闭环 + 独立 reviewer",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 11,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "Gas Town",
+   "sub": "Refinery 合并队列",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 12,
+   "col": 0
+  },
+  {
+   "id": "tool4",
+   "label": "Bernstein",
+   "sub": "确定性调度 + 合并闸门",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 12,
+   "col": 1
+  },
+  {
+   "id": "tool5",
+   "label": "Cursor",
+   "sub": "planner→worker→judge",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 12,
+   "col": 2
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "planner",
+   "",
+   "primary"
+  ],
+  [
+   "planner",
+   "check1",
+   "",
+   "primary"
+  ],
+  [
+   "check1",
+   "ok",
+   "",
+   "primary"
+  ],
+  [
+   "ok",
+   "dispatch",
+   "是",
+   "primary"
+  ],
+  [
+   "ok",
+   "replan",
+   "否"
+  ],
+  [
+   "replan",
+   "dispatch",
+   "定稿"
+  ],
+  [
+   "dispatch",
+   "w1"
+  ],
+  [
+   "dispatch",
+   "w2",
+   "",
+   "primary"
+  ],
+  [
+   "dispatch",
+   "wn"
+  ],
+  [
+   "w1",
+   "gate1"
+  ],
+  [
+   "w2",
+   "gate1",
+   "",
+   "primary"
+  ],
+  [
+   "wn",
+   "gate1"
+  ],
+  [
+   "gate1",
+   "gate2",
+   "",
+   "primary"
+  ],
+  [
+   "gate2",
+   "rw",
+   "",
+   "primary"
+  ],
+  [
+   "rw",
+   "integ",
+   "否",
+   "primary"
+  ],
+  [
+   "rw",
+   "fix",
+   "是"
+  ],
+  [
+   "fix",
+   "integ",
+   "1 轮"
+  ],
+  [
+   "integ",
+   "out",
+   "",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "security": {
+    "label": "代码节点（确定性校验）"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false
+}

@@ -1,0 +1,108 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-00",
+ "title": "单 Agent 基线",
+ "subtitle": "一个模型一次完成全部任务，其余 9 种模式都和它对比",
+ "caption": "模型调用 1 次 · 实测 24s / 2.5k tokens（×1.0）· 适合简单任务、做对照组 · 风险：视角单一，没有自检",
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 0,
+   "col": 0
+  },
+  {
+   "id": "solo",
+   "label": "全能助手",
+   "sub": "单 Agent",
+   "icon": "person",
+   "focal": true,
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 0,
+   "col": 2
+  },
+  {
+   "id": "tool0",
+   "label": "Claude Code / Codex",
+   "sub": "单会话，不开 subagent",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Cursor / Copilot",
+   "sub": "IDE 里的单个 agent",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "ChatGPT / Claude",
+   "sub": "普通对话",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 2
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "solo",
+   "",
+   "primary"
+  ],
+  [
+   "solo",
+   "out",
+   "一次完成",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful",
+ "groups": [
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ]
+}

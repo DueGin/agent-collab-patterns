@@ -1,0 +1,201 @@
+{
+ "type": "flowchart",
+ "dir": "LR",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-02",
+ "title": "路由分诊",
+ "subtitle": "分类器判断任务类型，只把任务交给一位最合适的专家（Router / Handoff）",
+ "caption": "只会走一条分支，本次实测分到「技术与工程」· 模型调用 2 次 · 实测 27s / 3.9k tokens（×1.5）· 风险：分错类就全错",
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "shape": "terminal",
+   "kind": "input",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "router",
+   "label": "属于哪类？",
+   "sub": "分诊台",
+   "shape": "decision",
+   "focal": true,
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "tech",
+   "label": "技术专家",
+   "icon": "code",
+   "row": 0,
+   "col": 2
+  },
+  {
+   "id": "biz",
+   "label": "商业顾问",
+   "icon": "briefcase",
+   "kind": "optional",
+   "row": 1,
+   "col": 2
+  },
+  {
+   "id": "creative",
+   "label": "创意总监",
+   "icon": "star",
+   "kind": "optional",
+   "row": 2,
+   "col": 2
+  },
+  {
+   "id": "general",
+   "label": "通用助手",
+   "icon": "person",
+   "kind": "optional",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "shape": "terminal",
+   "kind": "external",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "tool0",
+   "label": "OpenAI Agents SDK",
+   "sub": "triage + handoff",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 4,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Claude Code",
+   "sub": "按 description 选 subagent",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 4,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "Multica",
+   "sub": "Squad leader 路由派活",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 4,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "Dify / Coze",
+   "sub": "问题分类 / 意图识别",
+   "tag": "平台",
+   "kind": "muted",
+   "group": "tools",
+   "row": 4,
+   "col": 3
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "router",
+   "",
+   "primary"
+  ],
+  [
+   "tech",
+   "out",
+   "",
+   "primary"
+  ],
+  [
+   "biz",
+   "out",
+   "",
+   "async"
+  ],
+  [
+   "creative",
+   "out",
+   "",
+   "async"
+  ],
+  [
+   "general",
+   "out",
+   "",
+   "async"
+  ],
+  [
+   "router",
+   "tech",
+   "本次命中",
+   "primary"
+  ],
+  [
+   "router",
+   "biz",
+   "",
+   "async"
+  ],
+  [
+   "router",
+   "creative",
+   "",
+   "async"
+  ],
+  [
+   "router",
+   "general",
+   "",
+   "async"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "本次选中的专家"
+   },
+   "optional": {
+    "label": "未选中的专家"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "muted": {
+    "label": "代表工具"
+   },
+   "async": {
+    "label": "未走到的路径"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful",
+ "groups": [
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ]
+}

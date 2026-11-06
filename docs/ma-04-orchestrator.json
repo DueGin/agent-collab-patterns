@@ -1,0 +1,199 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-04",
+ "title": "委派式编排",
+ "subtitle": "编排者动态拆任务 → N 个子 Agent 并行（各自全新上下文）→ 编排者汇总：Orchestrator–Worker",
+ "caption": "模型调用 2+N 次 · 实测 59s / 12.1k tokens（×4.8），本次拆成 5 个子任务 · 适合可拆分的调研或写作 · 风险：拆分不清会重复劳动，没有验收",
+ "groups": [
+  {
+   "id": "workers",
+   "label": "动态并行 · 数量由编排者决定",
+   "style": "dashed"
+  },
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "planner",
+   "label": "编排者",
+   "sub": "拆分任务",
+   "icon": "gear",
+   "focal": true,
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "w1",
+   "label": "子 Agent 1",
+   "icon": "person",
+   "group": "workers",
+   "row": 0,
+   "col": 2
+  },
+  {
+   "id": "w2",
+   "label": "子 Agent 2",
+   "icon": "person",
+   "group": "workers",
+   "row": 1,
+   "col": 2
+  },
+  {
+   "id": "wn",
+   "label": "子 Agent N",
+   "icon": "person",
+   "group": "workers",
+   "row": 2,
+   "col": 2
+  },
+  {
+   "id": "synth",
+   "label": "编排者",
+   "sub": "汇总结果",
+   "icon": "gear",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 1,
+   "col": 4
+  },
+  {
+   "id": "tool0",
+   "label": "Claude Code",
+   "sub": "Agent 工具（subagent）",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Codex",
+   "sub": "spawn_agent",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "Kimi Code",
+   "sub": "Agent Swarm",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "Hermes Agent",
+   "sub": "delegate_task",
+   "tag": "开源",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 3
+  },
+  {
+   "id": "tool4",
+   "label": "AWS CAO / Paseo",
+   "sub": "跨厂商派活",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 4
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "planner",
+   "",
+   "primary"
+  ],
+  [
+   "planner",
+   "w1"
+  ],
+  [
+   "planner",
+   "w2",
+   "任务单",
+   "primary"
+  ],
+  [
+   "planner",
+   "wn"
+  ],
+  [
+   "w1",
+   "synth"
+  ],
+  [
+   "w2",
+   "synth",
+   "结果",
+   "primary"
+  ],
+  [
+   "wn",
+   "synth"
+  ],
+  [
+   "synth",
+   "out",
+   "",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful"
+}

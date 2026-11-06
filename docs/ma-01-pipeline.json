@@ -1,0 +1,159 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-01",
+ "title": "顺序流水线",
+ "subtitle": "研究员 → 撰稿人 → 编辑，逐棒传递；每一棒只看到上一棒的产出",
+ "caption": "模型调用 3 次 · 实测 72s / 10.2k tokens（×4.1），耗时逐棒累加 · 适合有明确工序的内容生产 · 风险：传话失真，一棒错棒棒错",
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 0,
+   "col": 0
+  },
+  {
+   "id": "researcher",
+   "label": "研究员",
+   "sub": "① 收集要点",
+   "icon": "person",
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "writer",
+   "label": "撰稿人",
+   "sub": "② 写初稿",
+   "icon": "person",
+   "row": 0,
+   "col": 2
+  },
+  {
+   "id": "editor",
+   "label": "编辑",
+   "sub": "③ 润色定稿",
+   "icon": "person",
+   "focal": true,
+   "row": 0,
+   "col": 3
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 0,
+   "col": 4
+  },
+  {
+   "id": "tool0",
+   "label": "MetaGPT",
+   "sub": "PM→架构师→工程师 SOP",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "ChatDev",
+   "sub": "瀑布式阶段接力",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "CrewAI",
+   "sub": "sequential 流程",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "Archon",
+   "sub": "YAML 写死步骤",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "tool4",
+   "label": "Dify / Coze / n8n",
+   "sub": "节点串联工作流",
+   "tag": "平台",
+   "kind": "muted",
+   "group": "tools",
+   "row": 1,
+   "col": 4
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "researcher",
+   "",
+   "primary"
+  ],
+  [
+   "researcher",
+   "writer",
+   "资料",
+   "primary"
+  ],
+  [
+   "writer",
+   "editor",
+   "初稿",
+   "primary"
+  ],
+  [
+   "editor",
+   "out",
+   "终稿",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful",
+ "groups": [
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ]
+}

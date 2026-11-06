@@ -1,0 +1,186 @@
+{
+ "type": "flowchart",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-05",
+ "title": "生成-评审循环",
+ "subtitle": "写手写 → 评审员打分 → 不达标就带着意见重写，最多改 2 轮：Evaluator–Optimizer",
+ "caption": "模型调用 2~5 次 · 实测 99s / 20.0k tokens（×8.0），两轮评审都没通过，到上限输出第 3 版 · 风险：评审标准偏松或偏严都会失效",
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "shape": "terminal",
+   "kind": "input",
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "v1",
+   "label": "写手",
+   "sub": "写第 1 版",
+   "icon": "document",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "critic",
+   "label": "评审员",
+   "sub": "跨厂商模型打分",
+   "icon": "check",
+   "focal": true,
+   "row": 2,
+   "col": 1
+  },
+  {
+   "id": "pass",
+   "label": "通过？",
+   "shape": "decision",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "limit",
+   "label": "已改 2 轮？",
+   "shape": "decision",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "revise",
+   "label": "写手",
+   "sub": "按意见重写",
+   "icon": "document",
+   "row": 2,
+   "col": 2
+  },
+  {
+   "id": "out",
+   "label": "输出当前版本",
+   "shape": "terminal",
+   "kind": "external",
+   "row": 4,
+   "col": 1
+  },
+  {
+   "id": "tool0",
+   "label": "Claude Code + Codex",
+   "sub": "codex-plugin-cc 评审闸门",
+   "tag": "插件",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Claude Code",
+   "sub": "Stop hook 退出码 2 打回",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "Orchestrator.inc",
+   "sub": "PR 评审 / CI 意见推回",
+   "tag": "第三方",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "Google ADK",
+   "sub": "LoopAgent",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 5,
+   "col": 3
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "v1",
+   "",
+   "primary"
+  ],
+  [
+   "v1",
+   "critic",
+   "初稿",
+   "primary"
+  ],
+  [
+   "critic",
+   "pass",
+   "",
+   "primary"
+  ],
+  [
+   "pass",
+   "out",
+   "是",
+   "primary"
+  ],
+  [
+   "pass",
+   "limit",
+   "否"
+  ],
+  [
+   "limit",
+   "revise",
+   "否"
+  ],
+  [
+   "revise",
+   "critic",
+   "新版本"
+  ],
+  [
+   "limit",
+   "out",
+   "是"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful",
+ "groups": [
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ]
+}

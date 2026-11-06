@@ -1,0 +1,176 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-07",
+ "title": "投票集成",
+ "subtitle": "3 个 Agent 各自独立完成整个任务（冗余而非分工），评委打分、找共识、择优融合：Best-of-N",
+ "caption": "模型调用 4 次 · 实测 42s / 14.1k tokens（×5.6）· 适合怕出错、需要稳定性的任务 · 风险：成本约 N 倍，答卷可能同质",
+ "groups": [
+  {
+   "id": "cands",
+   "label": "独立作答 · 冗余而非分工",
+   "style": "dashed"
+  },
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "a",
+   "label": "候选 A",
+   "sub": "temperature 0.2",
+   "icon": "document",
+   "group": "cands",
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "b",
+   "label": "候选 B",
+   "sub": "temperature 0.7",
+   "icon": "document",
+   "group": "cands",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "c",
+   "label": "候选 C",
+   "sub": "temperature 1.0",
+   "icon": "document",
+   "group": "cands",
+   "row": 2,
+   "col": 1
+  },
+  {
+   "id": "judge",
+   "label": "评委",
+   "sub": "打分 + 择优融合",
+   "icon": "star",
+   "focal": true,
+   "row": 1,
+   "col": 2
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "tool0",
+   "label": "Cursor",
+   "sub": "/best-of-n",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "Codex Cloud",
+   "sub": "--attempts 1-4",
+   "tag": "厂商",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "GitHub Agent HQ",
+   "sub": "同一 issue 派给多家",
+   "tag": "平台",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "llm-council",
+   "sub": "Karpathy：互评 + 主席融合",
+   "tag": "开源",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 3
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "a"
+  ],
+  [
+   "task",
+   "b",
+   "同一题"
+  ],
+  [
+   "task",
+   "c"
+  ],
+  [
+   "a",
+   "judge"
+  ],
+  [
+   "b",
+   "judge",
+   "完整答卷"
+  ],
+  [
+   "c",
+   "judge"
+  ],
+  [
+   "judge",
+   "out",
+   "",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful"
+}

@@ -1,0 +1,176 @@
+{
+ "type": "architecture",
+ "lang": "zh-CN",
+ "eyebrow": "多 Agent 协作模式 · MA-03",
+ "title": "并行分工",
+ "subtitle": "三位专家按固定视角并行分析（彼此看不见），汇总者合并：静态扇出 / Map-Reduce",
+ "caption": "模型调用 4 次 · 实测 41s / 8.8k tokens（×3.5）· 适合多维度分析 · 风险：视角事先定死，汇总者负担重",
+ "groups": [
+  {
+   "id": "par",
+   "label": "并行 · 互相看不见",
+   "style": "dashed"
+  },
+  {
+   "id": "tools",
+   "label": "市面上遵循此模式的工具（2026-10）",
+   "style": "dashed"
+  }
+ ],
+ "nodes": [
+  {
+   "id": "task",
+   "label": "任务",
+   "kind": "input",
+   "icon": "document",
+   "row": 1,
+   "col": 0
+  },
+  {
+   "id": "tech",
+   "label": "技术与实施",
+   "sub": "只看实现路径",
+   "icon": "code",
+   "group": "par",
+   "row": 0,
+   "col": 1
+  },
+  {
+   "id": "value",
+   "label": "商业与价值",
+   "sub": "只看收益成本",
+   "icon": "money",
+   "group": "par",
+   "row": 1,
+   "col": 1
+  },
+  {
+   "id": "risk",
+   "label": "风险与治理",
+   "sub": "只看风险合规",
+   "icon": "lock",
+   "group": "par",
+   "row": 2,
+   "col": 1
+  },
+  {
+   "id": "synth",
+   "label": "汇总者",
+   "sub": "合并三份要点",
+   "icon": "people",
+   "focal": true,
+   "row": 1,
+   "col": 2
+  },
+  {
+   "id": "out",
+   "label": "最终答案",
+   "kind": "external",
+   "icon": "check",
+   "row": 1,
+   "col": 3
+  },
+  {
+   "id": "tool0",
+   "label": "Google ADK",
+   "sub": "ParallelAgent",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 0
+  },
+  {
+   "id": "tool1",
+   "label": "MS Agent Framework",
+   "sub": "Concurrent 编排",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 1
+  },
+  {
+   "id": "tool2",
+   "label": "LangGraph",
+   "sub": "Send 扇出 / map-reduce",
+   "tag": "框架",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 2
+  },
+  {
+   "id": "tool3",
+   "label": "Dify / n8n",
+   "sub": "并行分支",
+   "tag": "平台",
+   "kind": "muted",
+   "group": "tools",
+   "row": 3,
+   "col": 3
+  }
+ ],
+ "edges": [
+  [
+   "task",
+   "tech"
+  ],
+  [
+   "task",
+   "value",
+   "同一任务"
+  ],
+  [
+   "task",
+   "risk"
+  ],
+  [
+   "tech",
+   "synth"
+  ],
+  [
+   "value",
+   "synth",
+   "要点"
+  ],
+  [
+   "risk",
+   "synth"
+  ],
+  [
+   "synth",
+   "out",
+   "",
+   "primary"
+  ]
+ ],
+ "legend": {
+  "title": "图例",
+  "entries": {
+   "input": {
+    "label": "输入"
+   },
+   "external": {
+    "label": "输出"
+   },
+   "backend": {
+    "label": "LLM Agent"
+   },
+   "focal": {
+    "label": "关键节点"
+   },
+   "primary": {
+    "label": "主路径"
+   },
+   "default": {
+    "label": "调用 / 数据流"
+   },
+   "muted": {
+    "label": "代表工具"
+   }
+  }
+ },
+ "watermark": false,
+ "budget": "faithful"
+}
