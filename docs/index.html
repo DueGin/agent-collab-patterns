@@ -17,6 +17,7 @@ p.lead{color:var(--sc-muted);margin:10px 0 28px;max-width:860px}
 h2{font-family:var(--sc-font-serif);font-weight:400;font-size:24px;margin:44px 0 6px}
 p.sub{color:var(--sc-muted);font-size:13px;margin:0 0 16px}
 footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);color:var(--sc-soft);font-size:12px}
+a.gh{display:inline-flex;align-items:center;gap:6px}a.gh .gh-ico{flex:none}
 .th-dark{display:none}
 [data-theme="dark"] .th-dark{display:block}[data-theme="dark"] .th-light{display:none}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .th-dark{display:block}:root:not([data-theme="light"]) .th-light{display:none}}
@@ -36,7 +37,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);colo
 .tl{margin:auto 0 0;padding-top:8px;font-size:12px;color:var(--sc-soft);line-height:1.6}</style></head><body><main><header class="top"><h1>多 Agent 协作模式图解</h1><nav aria-label="站点导航">
 <a href="./" class="cur" aria-current="page">全部模式</a>
 <a href="compare.html">纵向对比</a>
-<a href="https://github.com/DueGin/agent-collab-patterns">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header><p class="lead">10 种常见的多 Agent 协作模式。每种一张可交互的协作流程图（悬停追踪、点击聚焦、◀ ▶ 单步）；其中 4 种需要额外基础设施的，另附系统架构图。每张图下方列出优劣和市面上遵循该模式的工具；各模式之间的横向比较见 <a href="compare.html">纵向对比</a>。</p><ol class="grid"><li><a class="card" href="ma-00-single.html">
+<a class="gh" href="https://github.com/DueGin/agent-collab-patterns" target="_blank" rel="noopener" title="在 GitHub 上查看源码"><svg class="gh-ico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header><p class="lead">10 种常见的多 Agent 协作模式。每种一张可交互的协作流程图（悬停追踪、点击聚焦、◀ ▶ 单步）；其中 4 种需要额外基础设施的，另附系统架构图。每张图下方列出优劣和市面上遵循该模式的工具；各模式之间的横向比较见 <a href="compare.html">纵向对比</a>。</p><ol class="grid"><li><a class="card" href="ma-00-single.html">
 <div class="thumb"><img class="th-light" src="thumbs/ma-00-single-light.png" alt="单 Agent 基线 协作流程图" loading="lazy"><img class="th-dark" src="thumbs/ma-00-single-dark.png" alt="" loading="lazy"></div>
 <div class="body"><div class="idl"><span class="id">MA-00</span></div><h3>单 Agent 基线</h3><p class="topo">一个 Agent 一次完成</p>
 <div class="st"><span>调用 1</span><span>串行 1 轮</span><span>并行 无</span></div>
@@ -86,7 +87,7 @@ footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);colo
 <div class="body"><div class="idl"><span class="id">MA-09</span><span class="badge">含架构图</span></div><h3>契约编排 + 闸门验证</h3><p class="topo">规划 → 计划校验 → 任务卡 → 隔离并行 → 规则闸门 → 交叉评审 → 定向返工 → 单写者整合</p>
 <div class="st"><span>调用 N + 3 ~ 2N + 4</span><span>串行 4 ~ 6 轮</span><span>并行 N 路，任务卡隔离</span></div>
 <p class="pm"><b>＋</b> 事前用契约防止重复劳动：写集合不相交，计划用代码校验</p><p class="pm"><b>－</b> 流程最重，调用次数最多</p>
-<p class="tl">agentguild · Kimi Code · Orchestrator.inc · Gas Town · Bernstein</p></div></a></li></ol><footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer></main><script>(function(){var b=document.getElementById('theme-btn');if(!b)return;var r=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');
+<p class="tl">agentguild · Kimi Code · Orchestrator.inc · Gas Town · Bernstein</p></div></a></li></ol><footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。</footer></main><script>(function(){var b=document.getElementById('theme-btn');if(!b)return;var r=document.documentElement,m=matchMedia('(prefers-color-scheme: dark)');
 function dark(){var t=r.getAttribute('data-theme');return t?t==='dark':m.matches;}function sync(){b.setAttribute('aria-checked',String(dark()));b.textContent=dark()?'浅色':'深色';}
 b.addEventListener('click',function(){var t=dark()?'light':'dark';r.setAttribute('data-theme',t);try{localStorage.setItem('seecode:theme',t);}catch(e){}sync();});
 m.addEventListener&&m.addEventListener('change',sync);sync();})();</script></body></html>

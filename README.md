@@ -42,7 +42,7 @@
 ## 修改和重新生成
 
 源文件有两类：
-- `docs/ma-*.json`：每张图的 SeeCode spec，包括流程图和 `*-arch.json` 架构图。图页面和图片都由它生成。
+- `docs/ma-*.json`：每张图的源文件，包括流程图和 `*-arch.json` 架构图。图页面和图片都由它生成。
 - `data/patterns.json`：其余的展示内容，包括结构属性、优势、劣势、适合 / 不适合、按场景选、代表工具、来源，以及哪种模式带架构图。`scripts/site.mjs` 用它生成首页和纵向对比页，并把导航、架构图、优劣和工具区块插到每张图页面上。
 
 改完任意一类后运行：
@@ -56,8 +56,4 @@ scripts/build.sh --no-png   # 不重新导出图片（快）。只改了 pattern
 - `docs/thumbs/`：首页和模式页用的图，只有图本身，分亮色和暗色两份。
 - `docs/ma-*.png`：带标题和图注的完整图。
 
-需要 Node ≥ 20。导出图片需要本机装有 Chrome 或 Edge。脚本第一次运行时会把 SeeCode 拉到 `.seecode/`，并固定在一个指定的 commit。
-
-## 致谢
-
-图由 [SeeCode](https://github.com/Aryanutkarsh/SeeCode)（MIT License, © 2026 Aryanutkarsh）渲染。生成的 HTML 内嵌了 SeeCode 的查看器代码，许可证全文见 [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md)。
+需要 Node ≥ 20。导出图片需要本机装有 Chrome 或 Edge。脚本第一次运行时会自动下载渲染依赖，下载的内容不会提交到仓库。

@@ -23,6 +23,11 @@ const SITE_TITLE = '多 Agent 协作模式图解';
 const COLS = structure.cols; // [[key, label], ...]
 const byId = Object.fromEntries(patterns.map((p) => [p.id, p]));
 const nArch = patterns.filter((p) => p.arch).length;
+const GH_ICON = '<svg class="gh-ico" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M6.766 11.328c-2.063-.25-3.516-1.734-3.516-3.656 0-.781.281-1.625.75-2.188-.203-.515-.172-1.609.063-2.062.625-.078 1.468.25 1.968.703.594-.187 1.219-.281 1.985-.281.765 0 1.39.094 1.953.265.484-.437 1.344-.765 1.969-.687.218.422.25 1.515.046 2.047.5.593.766 1.39.766 2.203 0 1.922-1.453 3.375-3.547 3.64.531.344.89 1.094.89 1.954v1.625c0 .468.391.734.86.547C13.781 14.359 16 11.53 16 8.03 16 3.61 12.406 0 7.984 0 3.563 0 0 3.61 0 8.031a7.88 7.88 0 0 0 5.172 7.422c.422.156.828-.125.828-.547v-1.25c-.219.094-.5.156-.75.156-1.031 0-1.64-.562-2.078-1.609-.172-.422-.36-.672-.719-.719-.187-.015-.25-.093-.25-.187 0-.188.313-.328.625-.328.453 0 .844.281 1.25.86.313.452.64.655 1.031.655s.641-.14 1-.5c.266-.265.47-.5.657-.656"/></svg>';
+const GH_BTN = `<a class="gh" href="${REPO}" target="_blank" rel="noopener" title="在 GitHub 上查看源码">${GH_ICON}GitHub</a>`;
+const GH_CSS = `a.gh{display:inline-flex;align-items:center;gap:6px}a.gh .gh-ico{flex:none}`;
+// Diagram pages come with the renderer's favicon and generator tag; drop both.
+const unbrand = (h) => h.replace(/<meta name="generator"[^>]*>\n?/g, '').replace(/<link rel="icon"[^>]*>\n?/g, '');
 
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 const strip = (h) => h.replace(/<!-- (tools|site):start -->[\s\S]*?<!-- (tools|site):end -->\n?/g, '');
@@ -49,7 +54,8 @@ const NAV_CSS = `
 .pn a:hover,.pn a:focus-visible{color:var(--sc-ink);border-color:var(--sc-accent);outline:none}
 .pn .sp{flex:1}.pn .here{font:12px var(--sc-font-mono);color:var(--sc-soft)}
 .pn-foot{margin-top:28px}
-.sc-full .pn{display:none}`;
+.sc-full .pn{display:none}
+${GH_CSS}`;
 
 const PAGE_CSS = `${NAV_CSS}
 .sec{margin:32px 0 8px;padding-top:20px;border-top:1px solid var(--sc-rule)}
@@ -85,7 +91,7 @@ patterns.forEach((p, i) => {
     + (prev ? `<a href="${prev.slug}.html" title="${esc(prev.name)}">‹ ${esc(prev.id)}</a>` : '')
     + `<span class="here">${esc(p.id)} / ${esc(patterns[patterns.length - 1].id)}</span>`
     + (next ? `<a href="${next.slug}.html" title="${esc(next.name)}">${esc(next.id)} ›</a>` : '')
-    + `<span class="sp"></span>${p.arch ? `<a href="#arch-h">系统架构 ↓</a>` : ''}<a href="compare.html">纵向对比 →</a></nav>`;
+    + `<span class="sp"></span>${p.arch ? `<a href="#arch-h">系统架构 ↓</a>` : ''}<a href="compare.html">纵向对比 →</a>${GH_BTN}</nav>`;
 
   const arch = p.arch ? `<section class="sec arch" aria-labelledby="arch-h"><h2 id="arch-h">系统架构</h2>`
     + `<p class="note">上面的图是协作流程：谁把什么交给谁。这张图是把它真正跑起来需要的组件：共享状态、通信通道、隔离和闸门。</p>`
@@ -102,7 +108,7 @@ patterns.forEach((p, i) => {
     + p.tools.map((t) => `<li><span class="k">${esc(t.kind)}</span><b>${esc(t.name)}</b><span class="how">${esc(t.how)}</span></li>`).join('')
     + `</ul></section>`;
 
-  let h = strip(readFileSync(file, 'utf8'));
+  let h = unbrand(strip(readFileSync(file, 'utf8')));
   h = h.replace('</head>', block(`<style id="site-css">${PAGE_CSS}\n</style>`) + '</head>')
     .replace('<main class="sc-page">', '<main class="sc-page">\n' + block(nav('pn-top')))
     .replace('</figure>', '</figure>\n' + block(arch + pc + tools + nav('pn-foot')));
@@ -113,8 +119,8 @@ patterns.forEach((p, i) => {
     const af = join(docs, `${p.arch}.html`);
     if (!existsSync(af)) { console.error(`skip ${p.arch}: no ${af}`); return; }
     const anav = (cls) => `<nav class="pn ${cls}" aria-label="架构图导航"><a href="${p.slug}.html">← ${esc(p.id)} ${esc(p.name)}</a>`
-      + `<a href="./">全部模式</a><span class="sp"></span><a href="compare.html">纵向对比 →</a></nav>`;
-    let a = strip(readFileSync(af, 'utf8'));
+      + `<a href="./">全部模式</a><span class="sp"></span><a href="compare.html">纵向对比 →</a>${GH_BTN}</nav>`;
+    let a = unbrand(strip(readFileSync(af, 'utf8')));
     a = a.replace('</head>', block(`<style id="site-css">${NAV_CSS}\n</style>`) + '</head>')
       .replace('<main class="sc-page">', '<main class="sc-page">\n' + block(anav('pn-top')))
       .replace('</figure>', '</figure>\n' + block(anav('pn-foot')));
@@ -138,6 +144,7 @@ p.lead{color:var(--sc-muted);margin:10px 0 28px;max-width:860px}
 h2{font-family:var(--sc-font-serif);font-weight:400;font-size:24px;margin:44px 0 6px}
 p.sub{color:var(--sc-muted);font-size:13px;margin:0 0 16px}
 footer{margin-top:48px;padding-top:16px;border-top:1px solid var(--sc-rule);color:var(--sc-soft);font-size:12px}
+${GH_CSS}
 ${THEMED_IMG_CSS}
 @media (max-width:640px){main{padding:28px 16px 48px}.top h1{font-size:28px}}`;
 
@@ -149,9 +156,9 @@ const head = (title, extraCss) => `<!doctype html><html lang="zh-CN"><head><meta
 const topBar = (title, current) => `<header class="top"><h1>${esc(title)}</h1><nav aria-label="站点导航">
 <a href="./"${current === 'index' ? ' class="cur" aria-current="page"' : ''}>全部模式</a>
 <a href="compare.html"${current === 'compare' ? ' class="cur" aria-current="page"' : ''}>纵向对比</a>
-<a href="${REPO}">GitHub</a><button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header>`;
+${GH_BTN}<button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header>`;
 
-const footer = `<footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。图由 <a href="https://github.com/Aryanutkarsh/SeeCode">SeeCode</a> 渲染。</footer>`;
+const footer = `<footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。</footer>`;
 const tail = (js = '') => `${footer}</main><script>${THEME_TOGGLE_JS}${js}</script></body></html>\n`;
 
 // ---------- 2. index ----------
