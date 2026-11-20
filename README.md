@@ -57,3 +57,7 @@ scripts/build.sh --no-png   # 不重新导出图片（快）。只改了 pattern
 - `docs/ma-*.png`：带标题和图注的完整图。
 
 需要 Node ≥ 20。导出图片需要本机装有 Chrome 或 Edge。脚本第一次运行时会自动下载渲染依赖，下载的内容不会提交到仓库。
+
+## 友情链接
+
+- [LINUX DO](https://linux.do/)

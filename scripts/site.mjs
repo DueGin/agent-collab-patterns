@@ -158,7 +158,7 @@ const topBar = (title, current) => `<header class="top"><h1>${esc(title)}</h1><n
 <a href="compare.html"${current === 'compare' ? ' class="cur" aria-current="page"' : ''}>纵向对比</a>
 ${GH_BTN}<button id="theme-btn" type="button" role="switch" aria-checked="false" aria-label="深色模式">深色</button></nav></header>`;
 
-const footer = `<footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。</footer>`;
+const footer = `<footer>结构特征按每种模式的典型实现归纳；优劣根据实现结构和公开研究整理，不是测量结果。代表工具 2026-11-06 对照官方文档核实，多数只是部分对应。<br>友情链接：<a href="https://linux.do/" target="_blank" rel="noopener">LINUX DO</a></footer>`;
 const tail = (js = '') => `${footer}</main><script>${THEME_TOGGLE_JS}${js}</script></body></html>\n`;
 
 // ---------- 2. index ----------
